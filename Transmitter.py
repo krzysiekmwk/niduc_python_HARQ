@@ -1,0 +1,1 @@
+#pobieranie pliku binarnego (.wav, .dat) konwertowanie go na bajty
