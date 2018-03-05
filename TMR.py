@@ -24,7 +24,8 @@ class TMR:
                     decodedBitList.append('1')
                 else:
                     decodedBitList.append('0')
-                    amount = 0
+
+                amount = 0
                 count = 0
 
         return decodedBitList   # zwraca odkodowaną liste
