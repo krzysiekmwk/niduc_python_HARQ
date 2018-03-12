@@ -5,7 +5,7 @@ import random
 
 
 class Channel:
-    __prop = 1  # prawdopodobienstwo wystapienia zaklocenia  0.0 - 1.0
+    __prop = 0.2  # prawdopodobienstwo wystapienia zaklocenia  0.0 - 1.0
     __noisePropS0 = 0  # prawdopodobienstwo zaklocenia w stanie S0
     __noisePropS1 = 0  # prawdopodobienstwo zaklocenia w stanie S1
 
@@ -27,7 +27,7 @@ class Channel:
         self.__P10 = p10
         self.__P11 = 1 - p10
 
-    def addBSCNoise(self, bit, prop):  #zmiana na przeciwny bit z danym prawdopodobienstwem
+    def addBSCNoiseBit(self, bit, prop):  #zmiana na przeciwny bit z danym prawdopodobienstwem
         if (self.draw(prop)):
             if (bit == '0'):
                 bit = '1'
@@ -36,7 +36,14 @@ class Channel:
 
         return bit
 
-    def addGilbertNoise(self, bit):
+    def addBSCNoise(self, packet):# BSC DLA PAKIETU
+        noised = []
+        for bit in packet:
+            noised.append(self.addBSCNoiseBit(bit,self.__prop))
+
+        return noised
+
+    def addGilbertNoiseBit(self, bit):
         if(self.__gilbertState == 0):       #losowanie stanu modelu Gilberta
             if(self.draw(self.__P01)):
                 self.__gilbertState = 1
@@ -45,12 +52,19 @@ class Channel:
                 self.__gilbertState = 0
 
         if(self.__gilbertState == 0):                               #zamiana bitu na przeciwny z prawdopodobienstwem dla danego stanu modelu
-            bit = self.addBSCNoise(bit,self.__noisePropS0)
+            bit = self.addBSCNoiseBit(bit,self.__noisePropS0)
         elif(self.__gilbertState == 1):
-            bit = self.addBSCNoise(bit,self.__noisePropS1)
+            bit = self.addBSCNoiseBit(bit,self.__noisePropS1)
 
         #print("GILBERT:{}".format(self.__gilbertState))
         return bit
+
+    def addGilbertNoise(self,packet):
+        noised = []
+        for bit in packet:
+            noised.append(self.addGilbertNoiseBit(bit))
+
+        return packet
 
     def draw(self, propability):  #losowanie czy wystapi zdarzenie z okreslonym prawdopodobienstwem seed -> 0.0 - 1.0
         seed = random.random()
@@ -60,7 +74,7 @@ class Channel:
         else:
             return False
 
-'''
+
 channel = Channel(1,0.01,0.9,0.2,0.55)
 counter = 0
 for x in range(0,100):
@@ -70,4 +84,3 @@ for x in range(0,100):
         counter += 1
     print(bit)
 print(counter) # ilosc przeklamanych bitow
-'''
