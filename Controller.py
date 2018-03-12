@@ -14,7 +14,7 @@ class Controller:
         self.threadTransmiter.start()
         self.threadReceiver.start()
 
-        #JAKIES METODY DO OBSLUGI WYCH WATKOW
+        #JAKIES METODY DO OBSLUGI TYCH WATKOW
 
     def printNIC(self):
         print("NIC")

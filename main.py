@@ -16,16 +16,16 @@ bitListReceived = []
 
 tmr = TMR()
 bitListToSend = bitList
-#bitListToSend = tmr.codeTMR(bitList)  # użycie TMR
+bitListToSend = tmr.codeTMR(bitList)  # użycie TMR
 
 # Wprowadzenie zaklocen
 channel = Channel(1,0.01,0.9,0.2,0.55)
 for bit in bitListToSend:
     bitListReceived.append(channel.addBSCNoise(bit, 0.0001))
-    #newBitList.append(channel.addGilbertNoise(bit))
+#newBitList.append(channel.addGilbertNoise(bit))
 
 
-#bitListReceived = tmr.decodeTMR(bitListReceived)
+bitListReceived = tmr.decodeTMR(bitListReceived)
 
 # Sprawdzenie ilosci przeklamanych bitow
 counter = 0

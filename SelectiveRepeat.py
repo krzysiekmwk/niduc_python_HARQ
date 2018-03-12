@@ -24,7 +24,7 @@ class SelectiveRepeat:
     def transmit(self, packs): #packs do testów
         print("Rozpoczynam transmisje danych")
 
-        buffer = [] # wyslane paczki
+        buffer = [] #wyslane paczki
         indexes = [] #indeksy paczek
         errorBuf = [] #bufor zlych paczek
         errorIndexes = [] #indeksy zlych paczek
@@ -38,12 +38,14 @@ class SelectiveRepeat:
         while(sended < packets):
             print("petla nr {}".format(sended))
             while (len(buffer) < self.window - len(errorBuf) and sended < packets):  #dodajemy do bufora pakiety,
-                                                                                     # jezeli byly wczesniej jakies bledy to dodajemy mniej nowych pakietow bo miejsce w buforze zajmuja pakiety ktore trzeba wyslac od nowa
+                                                                                     # jezeli byly wczesniej jakies bledy to dodajemy mniej n
+                                                                                     # owych pakietow bo miejsce w buforze zajmuja pakiety
+                                                                                     # ktore trzeba wyslac od nowa
                 buffer.append(self.channelModel.addGilbertNoise(sourcePackages[sended])) # ZAKLOCANIE
                 indexes.append(sended)
                 sended =+ 1
 
-            errors = [] #zbior blednych paczek w jednym oknie bufora
+            errors = [] # zbior blednych paczek w jednym oknie bufora
 
             #ODBIERANIE PAKIETOW
             while (len(buffer) > 0):
