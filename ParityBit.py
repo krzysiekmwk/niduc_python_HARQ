@@ -16,7 +16,7 @@ class ParityBit:
 
         return bitList
 
-    def checkParity(self, bitList):
+    def isValid(self, bitList):
         counter = 0
         for bit in bitList:
             if (bit == '1'):
