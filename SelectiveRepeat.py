@@ -3,8 +3,8 @@
 from Channel import *
 
 class SelectiveRepeat:
-    sourcePackages = None #pakiety ze zrodla
-    destPackages = None #gotowe "przemielone" pakiety
+    sourcePackages = [] #pakiety ze zrodla
+    destPackages = [] #gotowe "przemielone" pakiety
     ###########################################################
     protocol = None #protocol z funkcja sprawdzajaca poprawnosc IsValid !!!
     ###########################################################
@@ -13,7 +13,7 @@ class SelectiveRepeat:
     errorCounter = 0 #ogolna ilosc NAKów
 
     def __init__(self,src,chan,prot,win):
-        self.source = src
+        self.sourcePackages = src
         self.channelModel = chan
         self.protocol = prot
         self.window = win
@@ -33,8 +33,6 @@ class SelectiveRepeat:
         errorBuf = [] #bufor zlych paczek
         errorIndexes = [] #indeksy zlych paczek
 
-        self.destPackages = [] # pakiety docelowe
-
         sended = 0 # ilosc wyslanych pakietow
         packets = len(self.sourcePackages) #ilosc pakietow
 
@@ -44,7 +42,8 @@ class SelectiveRepeat:
                                                                                      # jezeli byly wczesniej jakies bledy to dodajemy mniej nowych pakietow bo miejsce w buforze zajmuja pakiety ktore trzeba wyslac od nowa
                 buffer.append(self.channelModel.addGilbertNoise(self.sourcePackages[sended])) # ZAKLOCANIE
                 indexes.append(sended)
-                sended =+ 1
+                sended += 1
+                print("dodaje {}".format(sended))
 
             errors = [] #zbior blednych paczek w jednym oknie bufora
 
@@ -54,7 +53,7 @@ class SelectiveRepeat:
                 index = indexes.pop()
                 if (self.protocol.isValid(packet)): #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                     print("\tpaczka prawidlowa")
-                    self.destPackages[index] = packet  # paczka zapisana
+                    self.destPackages.insert(index,packet)  # paczka zapisana
                 else:
                     print("\tpaczka NIEprawidlowa")
                     errors.append(index)  #  dodanie INDEKSU paczki jako bledna
@@ -65,7 +64,7 @@ class SelectiveRepeat:
                     print("Proba wyslania BLEDNYCH pakietow")
                     if (self.protocol.isValid(packet)):
                         print("\tpaczka prawidlowa")
-                        self.destPackages[index] = packet  # zapisanie paczki
+                        self.destPackages.insert(index,packet)  # zapisanie paczki
                     else:
                         print("\tpaczka NIEprawidlowa")
                         errors.append(index)  # dodanie paczki jako bledna
