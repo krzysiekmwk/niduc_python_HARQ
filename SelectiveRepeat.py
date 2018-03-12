@@ -3,57 +3,58 @@
 from Channel import *
 
 class SelectiveRepeat:
-    source = None
-    destination = None
-    channelModel = None
-    bytesInPacket = 0
-    window = 0
-    errorCounter = 0
+    sourcePackages = None #pakiety ze zrodla
+    destPackages = None #gotowe "przemielone" pakiety
+    ###########################################################
+    protocol = None #protocol z funkcja sprawdzajaca poprawnosc IsValid !!!
+    ###########################################################
+    channelModel = None #model channelu
+    window = 0 #ilosc pakietow w oknie tzn. ile na raz pakietow zostanie wyslanych
+    errorCounter = 0 #ogolna ilosc NAKów
 
-    def __init__(self,src,dest,chan,bytinpak,win):
+    def __init__(self,src,chan,prot,win):
         self.source = src
-        self.destination = dest
         self.channelModel = chan
-        self.bytesInPacket = bytinpak
+        self.protocol = prot
         self.window = win
         self.errorCounter = 0
+
+    def getDestinationPackets(self): #zwraca "przerobiony" plik
+        return self.destPackages
 
     def getErrors(self):
         return self.errorCounter
 
-    def transmit(self, packs): #packs do testów
+    def transmit(self):   #TRANSMITUJE PAKIETY Z sourcePackages do destPackages
         print("Rozpoczynam transmisje danych")
 
-        buffer = [] #wyslane paczki
+        buffer = [] # wyslane paczki
         indexes = [] #indeksy paczek
         errorBuf = [] #bufor zlych paczek
         errorIndexes = [] #indeksy zlych paczek
 
-        sended = 0
-        packets = 0 # TUTAJ BEDZIE METODA KTORA ZWROCI ILOSC WSZYSTKICH PAKIETOW
-        
-        sourcePackages = packs # pakiety zrodlowe TUTAJ BEDZIE METODA KTORA ZWROCI PAKIETY ZRODLOWE
-        destPackages = [] # pakiety docelowe
+        self.destPackages = [] # pakiety docelowe
+
+        sended = 0 # ilosc wyslanych pakietow
+        packets = len(self.sourcePackages) #ilosc pakietow
 
         while(sended < packets):
             print("petla nr {}".format(sended))
             while (len(buffer) < self.window - len(errorBuf) and sended < packets):  #dodajemy do bufora pakiety,
-                                                                                     # jezeli byly wczesniej jakies bledy to dodajemy mniej n
-                                                                                     # owych pakietow bo miejsce w buforze zajmuja pakiety
-                                                                                     # ktore trzeba wyslac od nowa
-                buffer.append(self.channelModel.addGilbertNoise(sourcePackages[sended])) # ZAKLOCANIE
+                                                                                     # jezeli byly wczesniej jakies bledy to dodajemy mniej nowych pakietow bo miejsce w buforze zajmuja pakiety ktore trzeba wyslac od nowa
+                buffer.append(self.channelModel.addGilbertNoise(self.sourcePackages[sended])) # ZAKLOCANIE
                 indexes.append(sended)
                 sended =+ 1
 
-            errors = [] # zbior blednych paczek w jednym oknie bufora
+            errors = [] #zbior blednych paczek w jednym oknie bufora
 
             #ODBIERANIE PAKIETOW
             while (len(buffer) > 0):
                 packet = buffer.pop()
                 index = indexes.pop()
-                if (self.destination.isValid(packet)): #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
+                if (self.protocol.isValid(packet)): #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                     print("\tpaczka prawidlowa")
-                    destPackages[index] = packet  # paczka zapisana
+                    self.destPackages[index] = packet  # paczka zapisana
                 else:
                     print("\tpaczka NIEprawidlowa")
                     errors.append(index)  #  dodanie INDEKSU paczki jako bledna
@@ -62,9 +63,9 @@ class SelectiveRepeat:
                     packet = errorBuf.pop()
                     index = errorIndexes.pop()
                     print("Proba wyslania BLEDNYCH pakietow")
-                    if (self.destination.isValid(packet)):
+                    if (self.protocol.isValid(packet)):
                         print("\tpaczka prawidlowa")
-                        destPackages[index] = packet  # zapisanie paczki
+                        self.destPackages[index] = packet  # zapisanie paczki
                     else:
                         print("\tpaczka NIEprawidlowa")
                         errors.append(index)  # dodanie paczki jako bledna
@@ -72,6 +73,5 @@ class SelectiveRepeat:
 
             while (len(errors) > 0):  # dodanie paczek do glownego bufora z blednymi paczkami, zostana wyslane w nastepnym kroku petli
                 index = errors.pop()
-                errorBuf.append(self.channelModel.addGilbertNoise(sourcePackages[index])) #dodanie do glownego bufora z blednymi paczkami, pobranymi jeszcze raz z source i zakloconymi
+                errorBuf.append(self.channelModel.addGilbertNoise(self.sourcePackages[index])) #dodanie do glownego bufora z blednymi paczkami, pobranymi jeszcze raz z source i zakloconymi
                 errorIndexes.append(index)
-
