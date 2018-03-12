@@ -37,10 +37,10 @@ sr.transmit()
 packList = sr.getDestinationPackets()
 
 
-bitList = parity.deleteParityBit(packList)
+bitList1 = parity.deleteParityBit(packList)
 
 print("save data")
-fileOperator.saveFile("wynik.jpg", bitList)
+fileOperator.saveFile("wynik.jpg", bitList1)
 print("end")
 
 
