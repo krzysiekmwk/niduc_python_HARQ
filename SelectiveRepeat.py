@@ -33,6 +33,17 @@ class SelectiveRepeat:
         errorBuf = [] #bufor zlych paczek
         errorIndexes = [] #indeksy zlych paczek
 
+        packetsize = len(self.sourcePackages[0])
+
+        tempDest = []
+        for i in range(0,len(self.sourcePackages)):
+            temp = []
+            for j in range(0,packetsize):
+                temp.append('0')
+            tempDest.append(temp)
+
+        self.destPackages = tempDest
+
         sended = 0 # ilosc wyslanych pakietow
         packets = len(self.sourcePackages) #ilosc pakietow
 
@@ -54,7 +65,7 @@ class SelectiveRepeat:
                 index = indexes.pop()
                 if (self.protocol.isValid(packet)): #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                     #print("\tpaczka prawidlowa")
-                    self.destPackages.insert(index,packet)  # paczka zapisana
+                    self.destPackages[index] = packet  # paczka zapisana
                 else:
                     print("\tpaczka NIEprawidlowa")
                     errors.append(index)  #  dodanie INDEKSU paczki jako bledna
@@ -66,7 +77,7 @@ class SelectiveRepeat:
                 print("Proba wyslania BLEDNYCH pakietow")
                 if (self.protocol.isValid(packet)):
                     print("\tpaczka prawidlowa")
-                    self.destPackages.insert(index,packet)  # zapisanie paczki
+                    self.destPackages[index] = packet  # zapisanie paczki
                 else:
                     print("\tpaczka NIEprawidlowa")
                     errors.append(index)  # dodanie paczki jako bledna
