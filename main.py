@@ -64,24 +64,19 @@ print("save data")
 fileOperator.saveFile("wynik.jpg", bitListFinal)
 print("end")
 
-'''
 #METODA ZLICZAJACA BLEDY
 counterError = 0
 ind = 0
-for pack in packets:
-    if (pack != bitList1[ind]):
+for bit in bitListFinal:
+    if (bit != bitList[ind]):
         counterError += 1
     ind += 1
 
-#UWAGA TO Nie DZIALA NIE SUGEROAC SIE TYM
-print("TA FUNKCJA NIE DZIALA :D ->")
-print("ilosc blednych pakietow")
+print("ilosc blednych bitow wynikowych")
 print(counterError)
 print("ilosc pakietow ogolem")
-print(len(packets))
+print(len(bitListFinal))
 
-
-'''
 # # Symulacja wyslania (modyfikacja danych)
 # bitListToSend = []
 #
