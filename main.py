@@ -6,18 +6,18 @@ from ParityBit import *
 from SelectiveRepeat import *
 
 
-
 # Wczytanie listy bitow
 
 bitList = []
 fileOperator = FileOperator()
 bitList = fileOperator.readFile("test.jpg")
-#print(bitList)
+print(bitList)
 parity = ParityBit()
 
 packets = []
 packet = []
 
+# GENEROWANIE LISTY PAKIETOW DO WYSLANIA
 counter = 0
 for bit in bitList:
     packet.append(bit)  # generuje pakiet
@@ -28,30 +28,43 @@ for bit in bitList:
         packet = []
         counter = 0
 
-packets1 = []
+# DODANIE BITU PARZYSTOSCI DO KAZDEGO Z PAKIETOW
+print(packets)
+packetsWithParityBit = []
 for pack in packets:
-    pack1 = []
-    pack1 = parity.addParityBit(pack)
-    packets1.append(pack1)
+    pack = parity.addParityBit(pack)
+    packetsWithParityBit.append(pack)
 
+print(packetsWithParityBit)
 
-channel = Channel(0.3,0.01,0.01,0.3,0.6)
+channel = Channel(0.00000000000003,0.01,0.01,0.3,0.6)
 
-sr = SelectiveRepeat(packets1,channel,parity,5)
+sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5)
 sr.transmit()
 packList = sr.getDestinationPackets()
 
-
-bitList1 = []
+print(packList)
+# USUWANIE BITOW PARZYSTOSCI Z KAZDEGO PAKIETU
+packets = []
 for pack in packList:
-    pack1 = []
-    pack1 = parity.deleteParityBit(pack)
-    bitList1.append(pack1)
+    pack = parity.deleteParityBit(pack)
+    packets.append(pack)
+
+print(packets)
+
+# TWORZENIE PLIKU WYNIKOWEGO
+bitListFinal = []
+for package in packets:
+    for bit in package:
+        bitListFinal.append(bit)
+
+print(bitListFinal)
 
 print("save data")
-fileOperator.saveFile("wynik.jpg", bitList1)
+fileOperator.saveFile("wynik.jpg", bitListFinal)
 print("end")
 
+'''
 #METODA ZLICZAJACA BLEDY
 counterError = 0
 ind = 0
@@ -66,6 +79,9 @@ print("ilosc blednych pakietow")
 print(counterError)
 print("ilosc pakietow ogolem")
 print(len(packets))
+
+
+'''
 # # Symulacja wyslania (modyfikacja danych)
 # bitListToSend = []
 #

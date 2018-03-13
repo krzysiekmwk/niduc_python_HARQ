@@ -41,6 +41,7 @@ class SelectiveRepeat:
             while (len(buffer) < self.window - len(errorBuf) and sended < packets):  #dodajemy do bufora pakiety,
                                                                                      # jezeli byly wczesniej jakies bledy to dodajemy mniej nowych pakietow bo miejsce w buforze zajmuja pakiety ktore trzeba wyslac od nowa
                 buffer.append(self.channelModel.addGilbertNoise(self.sourcePackages[sended])) # ZAKLOCANIE
+                #buffer.append(self.channelModel.addBSCNoise(self.sourcePackages[sended]))  # ZAKLOCANIE
                 indexes.append(sended)
                 sended += 1
                 #print("dodaje {}".format(sended))

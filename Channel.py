@@ -26,6 +26,7 @@ class Channel:
         self.__P00 = 1 - p01
         self.__P10 = p10
         self.__P11 = 1 - p10
+        random.seed()
 
     def addBSCNoiseBit(self, bit, prop):  #zmiana na przeciwny bit z danym prawdopodobienstwem
         if (self.draw(prop)):
@@ -74,7 +75,7 @@ class Channel:
         else:
             return False
 
-
+'''
 channel = Channel(1,0.01,0.9,0.2,0.55)
 counter = 0
 for x in range(0,100):
@@ -84,3 +85,4 @@ for x in range(0,100):
         counter += 1
     print(bit)
 print(counter) # ilosc przeklamanych bitow
+'''
