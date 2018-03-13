@@ -25,25 +25,47 @@ for bit in bitList:
     counter += 1
     if (counter == 8):  # pakiet po 8 bitow
         packets.append(packet)  # tworzy liste pakietow
-        packet.clear()
+        packet = []
         counter = 0
 
-parity.addParityBit(packets)
-print(len(packets))
-channel = Channel(0.3,0.01,0.9,0.2,0.55)
+packets1 = []
+for pack in packets:
+    pack1 = []
+    pack1 = parity.addParityBit(pack)
+    packets1.append(pack1)
 
-sr = SelectiveRepeat(packets,channel,parity,5)
+
+channel = Channel(0.3,0.01,0.01,0.3,0.6)
+
+sr = SelectiveRepeat(packets1,channel,parity,5)
 sr.transmit()
 packList = sr.getDestinationPackets()
 
 
-bitList1 = parity.deleteParityBit(packList)
+bitList1 = []
+for pack in packList:
+    pack1 = []
+    pack1 = parity.deleteParityBit(pack)
+    bitList1.append(pack1)
 
 print("save data")
 fileOperator.saveFile("wynik.jpg", bitList1)
 print("end")
 
+#METODA ZLICZAJACA BLEDY
+counterError = 0
+ind = 0
+for pack in packets:
+    if (pack != bitList1[ind]):
+        counterError += 1
+    ind += 1
 
+#UWAGA TO Nie DZIALA NIE SUGEROAC SIE TYM
+print("TA FUNKCJA NIE DZIALA :D ->")
+print("ilosc blednych pakietow")
+print(counterError)
+print("ilosc pakietow ogolem")
+print(len(packets))
 # # Symulacja wyslania (modyfikacja danych)
 # bitListToSend = []
 #
@@ -75,6 +97,4 @@ print("end")
 
 
 # Zapis listy bitow
-print("save data")
-fileOperator.saveFile("wynik.jpg", bitList)
-print("end")
+

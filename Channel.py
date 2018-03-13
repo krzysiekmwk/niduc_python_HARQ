@@ -64,7 +64,7 @@ class Channel:
         for bit in packet:
             noised.append(self.addGilbertNoiseBit(bit))
 
-        return packet
+        return noised
 
     def draw(self, propability):  #losowanie czy wystapi zdarzenie z okreslonym prawdopodobienstwem seed -> 0.0 - 1.0
         seed = random.random()
