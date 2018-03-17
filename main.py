@@ -1,9 +1,5 @@
-from FileOperator import *
-from Channel import *
-from TMR import *
-from ByteConverter import *
 from ParityBit import *
-from SelectiveRepeat import *
+from StopAndWait import *
 
 
 # Wczytanie listy bitow
@@ -39,7 +35,8 @@ print(packetsWithParityBit)
 
 channel = Channel(0.00000000000003,0.01,0.01,0.3,0.6)
 
-sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5)
+#sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5)
+sr = StopAndWait(packetsWithParityBit,channel,parity)
 sr.transmit()
 packList = sr.getDestinationPackets()
 
