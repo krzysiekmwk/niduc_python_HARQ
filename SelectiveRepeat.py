@@ -1,6 +1,7 @@
 #Selective Repeat Protocol
 
 from Channel import *
+from TMR import *
 
 class SelectiveRepeat:
     sourcePackages = [] #pakiety ze zrodla
@@ -18,6 +19,7 @@ class SelectiveRepeat:
         self.protocol = prot
         self.window = win
         self.errorCounter = 0
+        self.tmr = TMR()
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages
@@ -63,7 +65,7 @@ class SelectiveRepeat:
             while (len(buffer) > 0):
                 packet = buffer.pop()
                 index = indexes.pop()
-                if (self.protocol.isValid(packet)): #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
+                if (self.protocol.isValid(self.tmr.decodeTMR(packet))): #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                     #print("\tpaczka prawidlowa")
                     self.destPackages[index] = packet  # paczka zapisana
                 else:
@@ -75,7 +77,7 @@ class SelectiveRepeat:
                 packet = errorBuf.pop()
                 index = errorIndexes.pop()
                 print("Proba wyslania BLEDNYCH pakietow")
-                if (self.protocol.isValid(packet)):
+                if (self.protocol.isValid(self.tmr.decodeTMR(packet))): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
                     print("\tpaczka prawidlowa")
                     self.destPackages[index] = packet  # zapisanie paczki
                 else:
@@ -86,4 +88,5 @@ class SelectiveRepeat:
             while (len(errors) > 0):  # dodanie paczek do glownego bufora z blednymi paczkami, zostana wyslane w nastepnym kroku petli
                 index = errors.pop()
                 errorBuf.append(self.channelModel.addGilbertNoise(self.sourcePackages[index])) #dodanie do glownego bufora z blednymi paczkami, pobranymi jeszcze raz z source i zakloconymi
+                #errorBuf.append(self.channelModel.addBSCNoise(self.sourcePackages[sended]))
                 errorIndexes.append(index)

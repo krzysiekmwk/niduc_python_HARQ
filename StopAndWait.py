@@ -1,6 +1,7 @@
 #Stop And Wait Protocol
 
 from Channel import *
+from TMR import *
 
 class StopAndWait:
     sourcePackages = [] #pakiety ze zrodla
@@ -16,6 +17,7 @@ class StopAndWait:
         self.channelModel = chan
         self.protocol = prot
         self.errorCounter = 0
+        self.tmr = TMR()
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages
@@ -44,7 +46,7 @@ class StopAndWait:
             packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended]) # ZAKLOCANIE
 
             #ODBIERANIE PAKIETOW
-            while (self.protocol.isValid(packet) == False):
+            while (self.protocol.isValid(self.tmr.decodeTMR(packet)) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
                 #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                 self.errorCounter += 1
                 print("\twysylanie pakietu {}".format(sended))

@@ -1,6 +1,6 @@
 from ParityBit import *
+from SelectiveRepeat import *
 from StopAndWait import *
-
 
 # Wczytanie listy bitow
 
@@ -25,18 +25,20 @@ for bit in bitList:
         counter = 0
 
 # DODANIE BITU PARZYSTOSCI DO KAZDEGO Z PAKIETOW
+tmr = TMR()
 print(packets)
 packetsWithParityBit = []
 for pack in packets:
     pack = parity.addParityBit(pack)
+    pack = tmr.codeTMR(pack)    # DODANIE TMR
     packetsWithParityBit.append(pack)
 
 print(packetsWithParityBit)
 
 channel = Channel(0.00000000000003,0.01,0.01,0.3,0.6)
 
-#sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5)
-sr = StopAndWait(packetsWithParityBit,channel,parity)
+sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5)
+#sr = StopAndWait(packetsWithParityBit,channel,parity)
 sr.transmit()
 packList = sr.getDestinationPackets()
 
@@ -44,6 +46,7 @@ print(packList)
 # USUWANIE BITOW PARZYSTOSCI Z KAZDEGO PAKIETU
 packets = []
 for pack in packList:
+    pack = tmr.decodeTMR(pack)  # USUWANIE TMR
     pack = parity.deleteParityBit(pack)
     packets.append(pack)
 
