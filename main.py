@@ -1,8 +1,10 @@
 from ParityBit import *
 from SelectiveRepeat import *
 from StopAndWait import *
+from tkinter import *
 
 # Wczytanie listy bitow
+from StopAndWaitGUI import StopAndWaitGUI
 
 bitList = []
 fileOperator = FileOperator()
@@ -35,10 +37,16 @@ for pack in packets:
 
 print(packetsWithParityBit)
 
-channel = Channel(0.00000000000003,0.01,0.01,0.3,0.6)
+channel = Channel(0.00000000000003,0.1,0.1,0.3,0.6)
 
-sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5)
-#sr = StopAndWait(packetsWithParityBit,channel,parity)
+tk = Tk()
+canvas = Canvas(tk, width=500, height=400, bg="#b6f7a3")
+canvas.pack()
+tk.title("GUI")
+
+# sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5)
+# sr = StopAndWait(packetsWithParityBit,channel,parity)
+sr = StopAndWaitGUI(packetsWithParityBit,channel,parity,canvas, tk)
 sr.transmit()
 packList = sr.getDestinationPackets()
 
@@ -109,3 +117,4 @@ print(len(bitListFinal))
 
 # Zapis listy bitow
 
+tk.mainloop()
