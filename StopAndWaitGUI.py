@@ -68,7 +68,6 @@ class StopAndWaitGUI:
 
             #ODBIERANIE PAKIETOW
             #TMR
-            '''
             while (self.protocol.isValid(self.tmr.decodeTMR(packet)) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
                 #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                 self.errorCounter += 1
@@ -87,6 +86,7 @@ class StopAndWaitGUI:
                 self.tk.update()
                 time.sleep(0.4)
                 packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
+                '''
             receiveLabelText.set("ACK: " + str(sended))
             self.tk.update()
             time.sleep(0.1)
