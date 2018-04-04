@@ -10,20 +10,20 @@ class Hamming:
                 newBitList.append(1)
             if(bit == '0'):
                 newBitList.append(0)
-        return newBitList
+        return numpy.array(newBitList, dtype = int)
 
-    def codeHamming(self,newBitList): #uzywajac macierzy G kodujemy nasz pakiecik
-        g = numpy.array([1,1,0,1],[1,0,1,1],[1,0,0,0],[0,1,1,1],[0,1,0,0],[0,0,1,0],[0,0,0,1])
+    def codeHamming(self, newBitList):   #uzywajac macierzy G kodujemy nasz pakiecik
+        g =  numpy.array([[1, 0, 0, 0, 0, 1, 1],[0, 1, 0, 0, 1, 0, 1],[0, 0, 1, 0, 1, 1, 0],[0, 0, 0, 1, 1, 1, 1]])
         enc = numpy.dot(g, newBitList)
         return enc
 
     def parityCheck(self, enc): #uzywamy macierzy H aby stworzyc macierz na ktorej sprawdzimy czy sa bledy
-        h = numpy.array([1,0,1,0,1,0,1],[0,1,1,0,0,1,1],[0,0,0,1,1,1,1])
-        parch = numpy.dot(h,enc)
+        h = numpy.array([[1,0,1,0,1,0,1],[0,1,1,0,0,1,1],[0,0,0,1,1,1,1]])
+        parch = numpy.dot(h, enc)
         return parch
 
     def decodeHamming(self, enc): #uzywamy macierz R do odkodowania, robimy to dopiero jak poprawimy bledy "duh"
-        r = numpy.array([0,0,1,0,0,0,0],[0,0,0,0,1,0,0],[0,0,0,0,0,0,1,0],[0,0,0,0,0,0,1])
+        r = numpy.array([[0,0,1,0,0,0,0],[0,0,0,0,1,0,0],[0,0,0,0,0,0,1,0],[0,0,0,0,0,0,1]])
         dec = numpy.dot(r,enc)
         return dec
 

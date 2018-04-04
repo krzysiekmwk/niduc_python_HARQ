@@ -35,7 +35,7 @@ packetsWithParityBit = []
 for pack in packets:
     pack = parity.addParityBit(pack)
     pack = tmr.codeTMR(pack)    # DODANIE TMR
-    pack = hamming.codeHamming(pack) # odpalenie Hamminga, !jeszcze na znakach!
+    pack = hamming.codeHamming(pack)   # odpalenie Hamminga, !jeszcze na znakach!
     packetsWithParityBit.append(pack)
 
 print(packetsWithParityBit)
