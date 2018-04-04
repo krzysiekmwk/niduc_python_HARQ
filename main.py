@@ -2,6 +2,7 @@ from ParityBit import *
 from SelectiveRepeat import *
 from StopAndWait import *
 from tkinter import *
+from Hamming import *
 
 # Wczytanie listy bitow
 from StopAndWaitGUI import StopAndWaitGUI
@@ -28,11 +29,13 @@ for bit in bitList:
 
 # DODANIE BITU PARZYSTOSCI DO KAZDEGO Z PAKIETOW
 tmr = TMR()
+hamming = Hamming()
 print(packets)
 packetsWithParityBit = []
 for pack in packets:
     pack = parity.addParityBit(pack)
     pack = tmr.codeTMR(pack)    # DODANIE TMR
+    pack = hamming.codeHamming(pack) # odpalenie Hamminga, !jeszcze na znakach!
     packetsWithParityBit.append(pack)
 
 print(packetsWithParityBit)
@@ -55,6 +58,7 @@ print(packList)
 packets = []
 for pack in packList:
     pack = tmr.decodeTMR(pack)  # USUWANIE TMR
+    pack = hamming.decodeHamming(pack) # usuniecie Hamminga
     pack = parity.deleteParityBit(pack)
     packets.append(pack)
 

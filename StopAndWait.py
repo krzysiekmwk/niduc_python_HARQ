@@ -46,6 +46,15 @@ class StopAndWait:
             packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended]) # ZAKLOCANIE
 
             #ODBIERANIE PAKIETOW
+            #TMR
+            '''
+            while (self.protocol.isValid(self.tmr.decodeTMR(packet)) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
+                #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
+                self.errorCounter += 1
+                print("\twysylanie pakietu {}".format(sended))
+                packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
+            '''
+            #HAMMING
             while (self.protocol.isValid(self.tmr.decodeTMR(packet)) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
                 #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                 self.errorCounter += 1

@@ -2,6 +2,7 @@
 
 from Channel import *
 from TMR import *
+from Hamming import *
 
 class SelectiveRepeat:
     sourcePackages = [] #pakiety ze zrodla
@@ -20,6 +21,7 @@ class SelectiveRepeat:
         self.window = win
         self.errorCounter = 0
         self.tmr = TMR()
+        self.hamming = Hamming()
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages
@@ -65,9 +67,20 @@ class SelectiveRepeat:
             while (len(buffer) > 0):
                 packet = buffer.pop()
                 index = indexes.pop()
+                #TMR
+                '''
                 if (self.protocol.isValid(self.tmr.decodeTMR(packet))): #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                     #print("\tpaczka prawidlowa")
                     self.destPackages[index] = packet  # paczka zapisana
+                else:
+                    print("\tpaczka NIEprawidlowa")
+                    errors.append(index)  #  dodanie INDEKSU paczki jako bledna
+                    self.errorCounter += 1
+                '''
+                #HAMMING
+                if(self.protocol.isValid(self.hamming.parityCheck(packet))): #sprawdzanie bledow przez parity check
+                    print("\tpaczka prawidlowa")
+                    self.destPackages[index] = packet #paczka zapisana
                 else:
                     print("\tpaczka NIEprawidlowa")
                     errors.append(index)  #  dodanie INDEKSU paczki jako bledna
@@ -77,6 +90,8 @@ class SelectiveRepeat:
                 packet = errorBuf.pop()
                 index = errorIndexes.pop()
                 print("Proba wyslania BLEDNYCH pakietow")
+                #TMR
+                '''
                 if (self.protocol.isValid(self.tmr.decodeTMR(packet))): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
                     print("\tpaczka prawidlowa")
                     self.destPackages[index] = packet  # zapisanie paczki
@@ -84,7 +99,15 @@ class SelectiveRepeat:
                     print("\tpaczka NIEprawidlowa")
                     errors.append(index)  # dodanie paczki jako bledna
                     self.errorCounter += 1
-
+                '''
+                #HAMMING
+                if (self.protocol.isValid(self.hamming.parityCheck(packet))):
+                    print("\tpaczka prawidlowa")
+                    self.destPackages[index] = packet  # zapisanie paczki
+                else:
+                    print("\tpaczka NIEprawidlowa")
+                    errors.append(index)  # dodanie paczki jako bledna
+                    self.errorCounter += 1
             while (len(errors) > 0):  # dodanie paczek do glownego bufora z blednymi paczkami, zostana wyslane w nastepnym kroku petli
                 index = errors.pop()
                 errorBuf.append(self.channelModel.addGilbertNoise(self.sourcePackages[index])) #dodanie do glownego bufora z blednymi paczkami, pobranymi jeszcze raz z source i zakloconymi

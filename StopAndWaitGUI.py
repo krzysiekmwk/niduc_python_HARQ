@@ -4,6 +4,7 @@ from Channel import *
 from TMR import *
 from tkinter import *
 import time
+from Hamming import *
 
 class StopAndWaitGUI:
     sourcePackages = [] #pakiety ze zrodla
@@ -22,6 +23,7 @@ class StopAndWaitGUI:
         self.tmr = TMR()
         self.canvas = canvas
         self.tk = tk
+        self.hamming = Hamming()
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages
@@ -65,7 +67,19 @@ class StopAndWaitGUI:
             packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended]) # ZAKLOCANIE
 
             #ODBIERANIE PAKIETOW
+            #TMR
+            '''
             while (self.protocol.isValid(self.tmr.decodeTMR(packet)) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
+                #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
+                self.errorCounter += 1
+                print("\twysylanie pakietu {}".format(sended))
+                receiveLabelText.set("NAK: " + str(sended))
+                self.tk.update()
+                time.sleep(0.4)
+                packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
+                '''
+            #Hamming
+            while (self.protocol.isValid(self.hamming.parityCheck(packet)) == False):
                 #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                 self.errorCounter += 1
                 print("\twysylanie pakietu {}".format(sended))
