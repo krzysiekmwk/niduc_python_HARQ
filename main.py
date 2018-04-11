@@ -6,6 +6,7 @@ from Hamming import *
 
 # Wczytanie listy bitow
 from StopAndWaitGUI import StopAndWaitGUI
+from SelectiveRepeatGUI import SelectiveRepeatGUI
 
 bitList = []
 fileOperator = FileOperator()
@@ -35,7 +36,7 @@ packetsWithParityBit = []
 for pack in packets:
     pack = parity.addParityBit(pack)
     pack = tmr.codeTMR(pack)    # DODANIE TMR
-    pack = hamming.codeHamming(pack)   # odpalenie Hamminga, !jeszcze na znakach!
+    # pack = hamming.codeHamming(pack)   # odpalenie Hamminga, !jeszcze na znakach!
     packetsWithParityBit.append(pack)
 
 print(packetsWithParityBit)
@@ -46,10 +47,13 @@ tk = Tk()
 canvas = Canvas(tk, width=500, height=400, bg="#b6f7a3")
 canvas.pack()
 tk.title("GUI")
+tk.update()
+
 
 # sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5)
 # sr = StopAndWait(packetsWithParityBit,channel,parity)
-sr = StopAndWaitGUI(packetsWithParityBit,channel,parity,canvas, tk)
+# sr = StopAndWaitGUI(packetsWithParityBit,channel,parity, tk)
+sr = SelectiveRepeatGUI(packetsWithParityBit, channel, parity, 5, tk)
 sr.transmit()
 packList = sr.getDestinationPackets()
 
@@ -58,7 +62,7 @@ print(packList)
 packets = []
 for pack in packList:
     pack = tmr.decodeTMR(pack)  # USUWANIE TMR
-    pack = hamming.decodeHamming(pack) # usuniecie Hamminga
+    # pack = hamming.decodeHamming(pack) # usuniecie Hamminga
     pack = parity.deleteParityBit(pack)
     packets.append(pack)
 
