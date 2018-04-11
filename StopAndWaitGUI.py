@@ -3,8 +3,6 @@
 from Channel import *
 from TMR import *
 from tkinter import *
-import time
-from Hamming import *
 
 class StopAndWaitGUI:
     sourcePackages = [] #pakiety ze zrodla
@@ -23,7 +21,8 @@ class StopAndWaitGUI:
         self.tmr = TMR()
         self.canvas = canvas
         self.tk = tk
-        self.hamming = Hamming()
+        self.waitForNextStep = True
+        self.isWindowDestroyed = False
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages
@@ -31,18 +30,48 @@ class StopAndWaitGUI:
     def getErrors(self):
         return self.errorCounter
 
+    def _nextStep(self):
+        self.waitForNextStep = False
+
+    '''
+    def _faster(self):
+            if(self.isWindowDestroyed == True):
+                self.isWindowDestroyed = False
+            else:
+                self.isWindowDestroyed = True
+    '''
+
+    def _delete_window(self):
+        self.window.destroy()
+        self.isWindowDestroyed = True
+        self.waitForNextStep = False
+
     def transmit(self):   #TRANSMITUJE PAKIETY Z sourcePackages do destPackages
+
+        # Ustawienie GUI
+        self.window = Toplevel(self.tk)
+        self.window.protocol("WM_DELETE_WINDOW", self._delete_window)
+        canvas = Canvas(self.window, width=300, height=300, bg="#429bf4")
+        canvas.pack()
+        self.window.title("Stop and Wait")
+
         strLab = "Count of package to send: " + str(len(self.sourcePackages))
-        countPackage = Label(self.tk, text=strLab)
-        self.canvas.create_window(100, 20, window=countPackage)
+        countPackage = Label(canvas, text=strLab)
+        canvas.create_window(100, 20, window=countPackage)
 
         packetLabelText = StringVar()
-        packetLabel = Label(self.tk, textvariable=packetLabelText)
-        self.canvas.create_window(100, 100, window=packetLabel)
+        packetLabel = Label(canvas, textvariable=packetLabelText)
+        canvas.create_window(70, 60, window=packetLabel)
 
-        receiveLabelText = StringVar()
-        receiveLabel = Label(self.tk, textvariable=receiveLabelText)
-        self.canvas.create_window(100, 150, window=receiveLabel)
+        buttonWaitForNextStep = Button(canvas, text="NEXT STEP", command=self._nextStep)
+        buttonWaitForNextStep.configure(width=40, height=3)
+        canvas.create_window(150, 150, window=buttonWaitForNextStep)
+
+        #buttonFasterSlower = Button(canvas, text="AUTO / MANUAL", command=self._faster)
+        #buttonFasterSlower.configure(width=40, height=3)
+        #canvas.create_window(150, 200, window=buttonFasterSlower)
+
+        canvas.update()
 
         print("Rozpoczynam transmisje danych")
 
@@ -62,33 +91,57 @@ class StopAndWaitGUI:
 
         while(sended < packets):  # ! U W A G A JEZELI JEST ZBYT DUZO BLEDOW TO PLIK NIE PRZEJDZIE BO SENDED DOJDZIE DO KONCA A ERRORBUF NIE BEDZIE PUSTY
             print("petla nr {}".format(sended))
+
+            # Show nr of package
             packetLabelText.set("Nr package to send: " + str(sended))
-            self.tk.update()
-            packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended]) # ZAKLOCANIE
+            while(self.waitForNextStep):
+                canvas.update()
+
+            if(self.isWindowDestroyed == False):
+                self.waitForNextStep = True
+            canvas.update()
+
+            # ZAKLOCANIE
+            packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
 
             #ODBIERANIE PAKIETOW
             #TMR
             while (self.protocol.isValid(self.tmr.decodeTMR(packet)) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
                 #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                 self.errorCounter += 1
+
                 print("\twysylanie pakietu {}".format(sended))
-                receiveLabelText.set("NAK: " + str(sended))
-                self.tk.update()
-                time.sleep(0.4)
+                packetLabelText.set("NAK: " + str(sended))
+
+                # SHOW IF IT IS NAK
+                while (self.waitForNextStep):
+                    canvas.update()
+
+                if (self.isWindowDestroyed == False):
+                    self.waitForNextStep = True
+                canvas.update()
+
+                # Show resend
+                packetLabelText.set("Resend package to send: " + str(sended))
+                while (self.waitForNextStep):
+                    canvas.update()
+
+                if (self.isWindowDestroyed == False):
+                    self.waitForNextStep = True
+                canvas.update()
+
+                # Ponowne zaklocenie poprawnego pakietu. "Retransmisja uszkodzonego pakietu"
                 packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
-                '''
-            #Hamming
-            while (self.protocol.isValid(self.hamming.parityCheck(packet)) == False):
-                #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
-                self.errorCounter += 1
-                print("\twysylanie pakietu {}".format(sended))
-                receiveLabelText.set("NAK: " + str(sended))
-                self.tk.update()
-                time.sleep(0.4)
-                packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
-                '''
-            receiveLabelText.set("ACK: " + str(sended))
-            self.tk.update()
-            time.sleep(0.1)
-            self.destPackages[sended] = packet  # paczka zapisana
+
+            packetLabelText.set("ACK: " + str(sended))
+
+            # SHOW IF IT IS ACK
+            while (self.waitForNextStep):
+                canvas.update()
+
+            if (self.isWindowDestroyed == False):
+                self.waitForNextStep = True
+            canvas.update()
+
+            self.destPackages[sended] = packet  # paczka zapisana poprawnie odebranych danych (moga byc uszkodzenia)
             sended += 1
