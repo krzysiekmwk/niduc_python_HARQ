@@ -13,13 +13,12 @@ class StopAndWaitGUI:
     channelModel = None #model channelu
     errorCounter = 0 #ogolna ilosc NAKów
 
-    def __init__(self,src,chan,prot,canvas, tk):
+    def __init__(self,src,chan,prot,tk):
         self.sourcePackages = src
         self.channelModel = chan
         self.protocol = prot
         self.errorCounter = 0
         self.tmr = TMR()
-        self.canvas = canvas
         self.tk = tk
         self.waitForNextStep = True
         self.isWindowDestroyed = False
