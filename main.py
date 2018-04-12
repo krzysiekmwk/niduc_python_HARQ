@@ -34,8 +34,8 @@ print(packets)
 packetsWithParityBit = []
 for pack in packets:
     pack = parity.addParityBit(pack)
-    pack = tmr.codeTMR(pack)    # DODANIE TMR
-    pack = hamming.codeHamming(pack)   # odpalenie Hamminga, !jeszcze na znakach!
+    #pack = tmr.codeTMR(pack)    # DODANIE TMR
+    pack = hamming.codeHamming(pack)   # odpalenie Hamminga
     packetsWithParityBit.append(pack)
 
 print(packetsWithParityBit)
@@ -48,8 +48,10 @@ canvas.pack()
 tk.title("GUI")
 
 # sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5)
+sr = SelectiveRepeat(packetsWithParityBit, channel, hamming, 5)
+# sr = StopAndWait(packetsWithParityBit,channel,hamming)
 # sr = StopAndWait(packetsWithParityBit,channel,parity)
-sr = StopAndWaitGUI(packetsWithParityBit,channel,parity,canvas, tk)
+# sr = StopAndWaitGUI(packetsWithParityBit,channel,parity,canvas, tk)
 sr.transmit()
 packList = sr.getDestinationPackets()
 
@@ -57,8 +59,8 @@ print(packList)
 # USUWANIE BITOW PARZYSTOSCI Z KAZDEGO PAKIETU
 packets = []
 for pack in packList:
-    pack = tmr.decodeTMR(pack)  # USUWANIE TMR
-    pack = hamming.decodeHamming(pack) # usuniecie Hamminga
+    #pack = tmr.decodeTMR(pack)  # USUWANIE TMR
+    pack = hamming.decodeHamming(pack, hamming.parityCheck(pack)) # usuniecie Hamminga
     pack = parity.deleteParityBit(pack)
     packets.append(pack)
 

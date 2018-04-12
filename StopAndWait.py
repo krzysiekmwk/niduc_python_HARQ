@@ -2,6 +2,7 @@
 
 from Channel import *
 from TMR import *
+from Hamming import *
 
 class StopAndWait:
     sourcePackages = [] #pakiety ze zrodla
@@ -18,6 +19,7 @@ class StopAndWait:
         self.protocol = prot
         self.errorCounter = 0
         self.tmr = TMR()
+        self.hamming = Hamming()
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages
@@ -47,12 +49,6 @@ class StopAndWait:
 
             #ODBIERANIE PAKIETOW
             #TMR
-            while (self.protocol.isValid(self.tmr.decodeTMR(packet)) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
-                #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
-                self.errorCounter += 1
-                print("\twysylanie pakietu {}".format(sended))
-                packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
-            #HAMMING
             '''
             while (self.protocol.isValid(self.tmr.decodeTMR(packet)) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
                 #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
@@ -60,5 +56,11 @@ class StopAndWait:
                 print("\twysylanie pakietu {}".format(sended))
                 packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
                 '''
+            #HAMMING
+            while (self.protocol.isValid(packet) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
+                #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
+                self.errorCounter += 1
+                print("\twysylanie pakietu {}".format(sended))
+                packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
             self.destPackages[sended] = packet  # paczka zapisana
             sended += 1
