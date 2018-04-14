@@ -3,6 +3,7 @@ from SelectiveRepeat import *
 from StopAndWait import *
 from tkinter import *
 from Hamming import *
+from CRC import *
 
 # Wczytanie listy bitow
 from StopAndWaitGUI import StopAndWaitGUI
@@ -31,17 +32,14 @@ for bit in bitList:
 # DODANIE BITU PARZYSTOSCI DO KAZDEGO Z PAKIETOW
 tmr = TMR()
 hamming = Hamming()
+crc = CRC()
 print(packets)
 packetsWithParityBit = []
 for pack in packets:
     pack = parity.addParityBit(pack)
-<<<<<<< HEAD
-    #pack = tmr.codeTMR(pack)    # DODANIE TMR
-    pack = hamming.codeHamming(pack)   # odpalenie Hamminga
-=======
+    # pack = crc.addCRC(pack)
+    # pack = hamming.codeHamming(pack)   # odpalenie Hamminga
     pack = tmr.codeTMR(pack)    # DODANIE TMR
-    # pack = hamming.codeHamming(pack)   # odpalenie Hamminga, !jeszcze na znakach!
->>>>>>> ff6c135e56c7454883ee08bcb28311e1a29fc8ec
     packetsWithParityBit.append(pack)
 
 print(packetsWithParityBit)
@@ -56,15 +54,15 @@ tk.update()
 
 
 # sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5)
-sr = SelectiveRepeat(packetsWithParityBit, channel, hamming, 5)
+# sr = SelectiveRepeat(packetsWithParityBit, channel, hamming, 5)
+# sr = SelectiveRepeat(packetsWithParityBit, channel, crc, 5)
 # sr = StopAndWait(packetsWithParityBit,channel,hamming)
 # sr = StopAndWait(packetsWithParityBit,channel,parity)
-<<<<<<< HEAD
-# sr = StopAndWaitGUI(packetsWithParityBit,channel,parity,canvas, tk)
-=======
+# sr = StopAndWait(packetsWithParityBit,channel,crc)
+# sr = StopAndWaitGUI(packetsWithParityBit,channel,parity, canvas, tk)
 # sr = StopAndWaitGUI(packetsWithParityBit,channel,parity, tk)
 sr = SelectiveRepeatGUI(packetsWithParityBit, channel, parity, 5, tk)
->>>>>>> ff6c135e56c7454883ee08bcb28311e1a29fc8ec
+
 sr.transmit()
 packList = sr.getDestinationPackets()
 
@@ -72,13 +70,8 @@ print(packList)
 # USUWANIE BITOW PARZYSTOSCI Z KAZDEGO PAKIETU
 packets = []
 for pack in packList:
-<<<<<<< HEAD
-    #pack = tmr.decodeTMR(pack)  # USUWANIE TMR
-    pack = hamming.decodeHamming(pack, hamming.parityCheck(pack)) # usuniecie Hamminga
-=======
+    # pack = hamming.decodeHamming(pack, hamming.parityCheck(pack)) # usuniecie Hamminga
     pack = tmr.decodeTMR(pack)  # USUWANIE TMR
-    # pack = hamming.decodeHamming(pack) # usuniecie Hamminga
->>>>>>> ff6c135e56c7454883ee08bcb28311e1a29fc8ec
     pack = parity.deleteParityBit(pack)
     packets.append(pack)
 
