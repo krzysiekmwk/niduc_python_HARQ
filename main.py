@@ -73,6 +73,7 @@ for pack in packList:
     # pack = hamming.decodeHamming(pack, hamming.parityCheck(pack)) # usuniecie Hamminga
     pack = tmr.decodeTMR(pack)  # USUWANIE TMR
     pack = parity.deleteParityBit(pack)
+    # pack = crc.deleteCRC(pack)
     packets.append(pack)
 
 print(packets)
