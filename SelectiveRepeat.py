@@ -14,7 +14,7 @@ class SelectiveRepeat:
     window = 0 #ilosc pakietow w oknie tzn. ile na raz pakietow zostanie wyslanych
     errorCounter = 0 #ogolna ilosc NAKów
 
-    def __init__(self,src,chan,prot,win):
+    def __new__(cls,src,chan,prot,win):
         self.sourcePackages = src
         self.channelModel = chan
         self.protocol = prot
@@ -22,6 +22,7 @@ class SelectiveRepeat:
         self.errorCounter = 0
         self.tmr = TMR()
         self.hamming = Hamming()
+        return super(SelectiveRepeat,cls).__new__(cls)
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages
@@ -77,7 +78,7 @@ class SelectiveRepeat:
                     self.errorCounter += 1
                 #HAMMING
                 '''
-                if(self.protocol.isValid(packet)): #sprawdzanie bledow przez parity check
+                if(self.protocol.isValid(self.hamming.parityCheck(packet))): #sprawdzanie bledow przez parity check
                     print("\tpaczka prawidlowa")
                     self.destPackages[index] = packet #paczka zapisana
                 else:
@@ -99,7 +100,7 @@ class SelectiveRepeat:
                     self.errorCounter += 1
                 #HAMMING
                 '''
-                if (self.protocol.isValid(packet)):
+                if (self.protocol.isValid(self.hamming.parityCheck(packet))):
                     print("\tpaczka prawidlowa")
                     self.destPackages[index] = packet  # zapisanie paczki
                 else:

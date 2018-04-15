@@ -15,7 +15,7 @@ class SelectiveRepeatGUI:
     window = 0 #ilosc pakietow w oknie tzn. ile na raz pakietow zostanie wyslanych
     errorCounter = 0 #ogolna ilosc NAKów
 
-    def __init__(self,src,chan,prot,win, tk):
+    def __new__(cls,src,chan,prot,win, tk):
         self.sourcePackages = src
         self.channelModel = chan
         self.protocol = prot
@@ -26,6 +26,7 @@ class SelectiveRepeatGUI:
         self.tk = tk
         self.waitForNextStep = True
         self.isWindowDestroyed = False
+        return super(SelectiveRepeatGUI,cls).__new__(cls)
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages

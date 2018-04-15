@@ -3,15 +3,78 @@ from SelectiveRepeat import *
 from StopAndWait import *
 from tkinter import *
 from Hamming import *
-from CRC import *
 
 # Wczytanie listy bitow
 from StopAndWaitGUI import StopAndWaitGUI
 from SelectiveRepeatGUI import SelectiveRepeatGUI
 
+def nextStep():
+    global waitForNextStep
+    waitForNextStep = False
+
+waitForNextStep = True;
+
+
+tk = Tk()
+tk.geometry("200x700")
+canvas = Canvas(tk, width=200, height=700)
+
+canvas.pack()
+tk.title("GUI")
+tk.update()
+
+Label(canvas, text="File: ").pack()
+Efile = Entry(canvas)
+Efile.pack()
+
+CheckVar = IntVar()
+Checkbutton(canvas, text = "Visualization", variable = CheckVar,
+                 onvalue = 1, offvalue = 0).pack()
+
+
+Label(canvas, text="Channel model:").pack()
+var = IntVar()
+Radiobutton(canvas, text="BSC", variable=var,value=1).pack()
+EBSC = Entry(canvas)
+EBSC.pack()
+EBSC.insert(0,1)
+Radiobutton(canvas, text="Gilbert", variable=var, value=2).pack()
+EG1 = Entry(canvas)
+EG2 = Entry(canvas)
+EG3 = Entry(canvas)
+EG4 = Entry(canvas)
+EG1.pack()
+EG2.pack()
+EG3.pack()
+EG4.pack()
+EG1.insert(0,1)
+EG2.insert(0,1)
+EG3.insert(0,1)
+EG4.insert(0,1)
+
+
+Label(canvas, text="Protocol:").pack()
+varProtocol = IntVar()
+Radiobutton(canvas, text="Selective Repeat", variable=varProtocol,value=1).pack()
+Radiobutton(canvas, text="Stop And Wait", variable=varProtocol, value=2).pack()
+
+Label(canvas, text="Encoding protcols:").pack()
+var = IntVar()
+Radiobutton(canvas, text="TMR + Parity", variable=var,value=1).pack()
+Radiobutton(canvas, text="Hamming + CRC32", variable=var, value=2).pack()
+Button(canvas, text="START", command=nextStep).pack()
+tk.update()
+
 bitList = []
 fileOperator = FileOperator()
-bitList = fileOperator.readFile("test.jpg")
+
+while (waitForNextStep):
+    canvas.update()
+
+waitForNextStep = True;
+fileName = Efile.get()
+
+bitList = fileOperator.readFile(fileName)
 print(bitList)
 parity = ParityBit()
 
@@ -32,36 +95,31 @@ for bit in bitList:
 # DODANIE BITU PARZYSTOSCI DO KAZDEGO Z PAKIETOW
 tmr = TMR()
 hamming = Hamming()
-crc = CRC()
 print(packets)
 packetsWithParityBit = []
 for pack in packets:
     pack = parity.addParityBit(pack)
-    # pack = crc.addCRC(pack)
-    # pack = hamming.codeHamming(pack)   # odpalenie Hamminga
     pack = tmr.codeTMR(pack)    # DODANIE TMR
+    # pack = hamming.codeHamming(pack)   # odpalenie Hamminga, !jeszcze na znakach!
     packetsWithParityBit.append(pack)
 
 print(packetsWithParityBit)
 
-channel = Channel(0.00000000000003,0.1,0.1,0.3,0.6)
-
-tk = Tk()
-canvas = Canvas(tk, width=500, height=400, bg="#b6f7a3")
-canvas.pack()
-tk.title("GUI")
-tk.update()
+#channel = Channel(0.00000000000003,0.1,0.1,0.3,0.6)
+channel = Channel(float(str(EBSC.get())),float(str(EG1.get())),float(str(EG2.get())),float(str(EG3.get())),float(str(EG4.get())))
 
 
-# sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5)
-# sr = SelectiveRepeat(packetsWithParityBit, channel, hamming, 5)
-# sr = SelectiveRepeat(packetsWithParityBit, channel, crc, 5)
-# sr = StopAndWait(packetsWithParityBit,channel,hamming)
-# sr = StopAndWait(packetsWithParityBit,channel,parity)
-# sr = StopAndWait(packetsWithParityBit,channel,crc)
-# sr = StopAndWaitGUI(packetsWithParityBit,channel,parity, canvas, tk)
-# sr = StopAndWaitGUI(packetsWithParityBit,channel,parity, tk)
-sr = SelectiveRepeatGUI(packetsWithParityBit, channel, parity, 5, tk)
+if CheckVar == 0:
+    if varProtocol == 1:
+        sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5)
+    if varProtocol == 2:
+        sr = StopAndWait(packetsWithParityBit,channel,parity)
+else:
+    if varProtocol == 2:
+        sr = StopAndWaitGUI(packetsWithParityBit,channel,parity, tk)
+    if varProtocol == 1:
+        sr = SelectiveRepeatGUI(packetsWithParityBit, channel, parity, 5, tk)
+
 
 sr.transmit()
 packList = sr.getDestinationPackets()
@@ -70,8 +128,8 @@ print(packList)
 # USUWANIE BITOW PARZYSTOSCI Z KAZDEGO PAKIETU
 packets = []
 for pack in packList:
-    # pack = hamming.decodeHamming(pack, hamming.parityCheck(pack)) # usuniecie Hamminga
     pack = tmr.decodeTMR(pack)  # USUWANIE TMR
+    # pack = hamming.decodeHamming(pack) # usuniecie Hamminga
     pack = parity.deleteParityBit(pack)
     packets.append(pack)
 
