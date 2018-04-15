@@ -15,7 +15,7 @@ class SelectiveRepeatGUI:
     window = 0 #ilosc pakietow w oknie tzn. ile na raz pakietow zostanie wyslanych
     errorCounter = 0 #ogolna ilosc NAKów
 
-    def __new__(cls,src,chan,prot,win, tk):
+    def __init__(self,src,chan,prot,win, tk):
         self.sourcePackages = src
         self.channelModel = chan
         self.protocol = prot
@@ -26,7 +26,6 @@ class SelectiveRepeatGUI:
         self.tk = tk
         self.waitForNextStep = True
         self.isWindowDestroyed = False
-        return super(SelectiveRepeatGUI,cls).__new__(cls)
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages
@@ -49,7 +48,7 @@ class SelectiveRepeatGUI:
         self.root.protocol("WM_DELETE_WINDOW", self._delete_window)
         canvas = Canvas(self.root, width=300, height=300, bg="#e5b390")
         canvas.pack()
-        self.root.title("Stop and Wait")
+        self.root.title("Selective Repeat")
 
         strLab = "Count of package to send: " + str(len(self.sourcePackages))
         countPackage = Label(canvas, text=strLab)

@@ -5,8 +5,8 @@ from tkinter import *
 from Hamming import *
 
 # Wczytanie listy bitow
-from StopAndWaitGUI import StopAndWaitGUI
-from SelectiveRepeatGUI import SelectiveRepeatGUI
+from StopAndWaitGUI import *
+from SelectiveRepeatGUI import *
 
 def nextStep():
     global waitForNextStep
@@ -68,8 +68,12 @@ tk.update()
 bitList = []
 fileOperator = FileOperator()
 
+print("WAIT FOR BUTN")
+
 while (waitForNextStep):
     canvas.update()
+
+print("AFTER BTN")
 
 waitForNextStep = True;
 fileName = Efile.get()
@@ -105,21 +109,28 @@ for pack in packets:
 
 print(packetsWithParityBit)
 
-#channel = Channel(0.00000000000003,0.1,0.1,0.3,0.6)
+print("CZANEL")
+# channel = Channel(0.00000000000003,0.1,0.1,0.3,0.6)
 channel = Channel(float(str(EBSC.get())),float(str(EG1.get())),float(str(EG2.get())),float(str(EG3.get())),float(str(EG4.get())))
 
+print("CZE CZE CZEKIN")
 
-if CheckVar == 0:
-    if varProtocol == 1:
+sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5) # przypisanie czegokolwiek, coby sie python nie czepial
+
+if CheckVar.get() == 0:
+    if varProtocol.get() == 1:
+        print("VAR 0 PROT 1")
         sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5)
-    if varProtocol == 2:
+    if varProtocol.get() == 2:
+        print("VAR 0 PROT 2")
         sr = StopAndWait(packetsWithParityBit,channel,parity)
 else:
-    if varProtocol == 2:
+    if varProtocol.get() == 2:
+        print("VAR 1 PROT 2")
         sr = StopAndWaitGUI(packetsWithParityBit,channel,parity, tk)
-    if varProtocol == 1:
+    if varProtocol.get() == 1:
+        print("VAR 1 PROT 1")
         sr = SelectiveRepeatGUI(packetsWithParityBit, channel, parity, 5, tk)
-
 
 sr.transmit()
 packList = sr.getDestinationPackets()

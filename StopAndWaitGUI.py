@@ -13,7 +13,7 @@ class StopAndWaitGUI:
     channelModel = None #model channelu
     errorCounter = 0 #ogolna ilosc NAKów
 
-    def __new__(cls,src,chan,prot,tk):
+    def __init__(self,src,chan,prot,tk):
         self.sourcePackages = src
         self.channelModel = chan
         self.protocol = prot
@@ -22,7 +22,6 @@ class StopAndWaitGUI:
         self.tk = tk
         self.waitForNextStep = True
         self.isWindowDestroyed = False
-        return super(StopAndWaitGUI, cls).__new__(cls)
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages

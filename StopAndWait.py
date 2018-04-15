@@ -12,13 +12,12 @@ class StopAndWait:
     channelModel = None #model channelu
     errorCounter = 0 #ogolna ilosc NAKów
 
-    def __new__(cls,src,chan,prot):
+    def __init__(self,src,chan,prot):
         self.sourcePackages = src
         self.channelModel = chan
         self.protocol = prot
         self.errorCounter = 0
         self.tmr = TMR()
-        return super(StopAndWait,cls).__new__(cls)
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages
