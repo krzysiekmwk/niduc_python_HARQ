@@ -31,6 +31,7 @@ class Hamming:
         enc = numpy.dot(g, newPacket)%2
         #Powrot do listy char. ENC posiada 7 wierszy po kilka kolumn (len/7)
         charPack = self.numpyToChar(enc)
+        #nummi = self.charToNumpy(charPack) #wyglada tak samo jak enc
         return charPack
 
     def parityCheck(self, enc): #uzywamy macierzy H aby stworzyc macierz na ktorej sprawdzimy czy sa bledy
@@ -71,6 +72,27 @@ class Hamming:
                 if col == 0:
                     chA.append('0')
         return chA
+
+    def charToNumpy(self, list):
+        listLength = len(list)
+        rowsNumber = listLength / 7
+        row = []
+        col = []
+        i = 0
+        for char in list:
+            if(char == '1'):
+                row.append(1)
+            else:
+                row.append(0)
+
+            i += 1
+
+            if(i == rowsNumber):
+                i = 0
+                col.append(row)
+                row = []
+
+        return numpy.array(col)
 
     def chToInt(self, chA): # nie dziala :c
         # The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
