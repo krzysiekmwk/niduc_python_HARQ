@@ -26,10 +26,12 @@ class Hamming:
         return numpy.transpose(matrix)
 
     def codeHamming(self, pack):   #uzywajac macierzy G kodujemy nasz pakiecik
-        newPacket = Hamming.createPacket(self, pack)
+        newPacket = self.createPacket(pack)
         g = numpy.array([[1,1,0,1],[1,0,1,1],[1,0,0,0],[0,1,1,1],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) #(7,4)
         enc = numpy.dot(g, newPacket)%2
-        return enc
+        #Powrot do listy char. ENC posiada 7 wierszy po kilka kolumn (len/7)
+        charPack = self.numpyToChar(enc)
+        return charPack
 
     def parityCheck(self, enc): #uzywamy macierzy H aby stworzyc macierz na ktorej sprawdzimy czy sa bledy
         enc = numpy.asarray(enc, dtype = int) # ValueError: setting an array element with a sequence.
@@ -60,15 +62,15 @@ class Hamming:
         dec = numpy.dot(r, enc)
         return dec
 
-    def intToCh(self, intA): # z jakiegos powodu nie dziala
-        # The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+    def numpyToChar(self, enc):
         chA = []
-        for bit in intA:
-            if bit == 1:
-                chA.append('1')
-            if bit == 0:
-                chA.append('0')
-        return numpy.array(chA)
+        for row in enc:
+            for col in row:
+                if col == 1:
+                    chA.append('1')
+                if col == 0:
+                    chA.append('0')
+        return chA
 
     def chToInt(self, chA): # nie dziala :c
         # The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
