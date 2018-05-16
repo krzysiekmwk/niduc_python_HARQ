@@ -82,16 +82,20 @@ class Hamming:
             if bit == '1':
                 print(index)
                 number += 2^index # liczymy z binarki od razu na system dziesietny
-        for index, bit in enumerate(enc): # jezeli bylo 0 robimy 1
+        print(number)
+        print(enc)
+        for index, bit in enumerate(enc): # jezeli bylo 0 robimy 1, a z 1 robimy 0
             if index == number:
                 if bit == '1':
-                    bit == '0'
+                    enc[index] = '0'
                 else:
-                    bit == '1'
-        r = numpy.array([[0,0,1,0,0,0,0],[0,0,0,0,1,0,0],[0,0,0,0,0,0,1,0],[0,0,0,0,0,0,1]])
+                    enc[index] = '1'
+        print(enc)
+        r = numpy.array([[0,0,1,0,0,0,0],[0,0,0,0,1,0,0],[0,0,0,0,0,0,1,0],[0,0,0,0,0,0,1]]) # (4,7)
         enc = self.createPacket4(enc)
         dec = numpy.dot(r, enc)
-        return dec
+        charDec = self.numpyToChar(dec)
+        return charDec
 
     def numpyToChar(self, enc):
         chA = []
@@ -156,5 +160,9 @@ hamming = Hamming()
 bitList = hamming.codeHamming(bitList)
 print(bitList)
 print(hamming.parityCheck(bitList))
+print("dlugosc bitlist przed")
+print(len(bitList))
 bitList = hamming.decodeHamming(bitList)
 print(bitList)
+print("dlugosc bitlist po")
+print(len(bitList))
