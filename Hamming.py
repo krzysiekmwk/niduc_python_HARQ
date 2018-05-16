@@ -3,7 +3,7 @@ from FileOperator import *
 
 class Hamming:
 
-    def createPacket(self, pack): # robimy z naszych pakiecikow po 8, pakieciki po 4 do Hamminga
+    def createPacket4(self, pack): # robimy z naszych pakiecikow po 8, pakieciki po 4 do Hamminga
         packet = []
         newPacket = []
         counter = 0
@@ -25,41 +25,71 @@ class Hamming:
         matrix = numpy.asarray(newPacket)
         return numpy.transpose(matrix)
 
+    def createPacket7(self, pack): # robimy z naszych pakiecikow robimy pakieciki po 7 do ParitiyCheck Hamminga
+        packet = []
+        newPacket = []
+        counter = 0
+        for bit in pack:
+            if bit == '1':
+                packet.append(1)
+                counter += 1
+            if bit == '0':
+                packet.append(0)
+                counter += 1
+            if counter == 7:
+                newPacket.append(packet)
+                counter = 0
+                packet = []
+        length = len(packet)
+        for i in range(0, 7 - length):
+            packet.append(0)
+        newPacket.append(packet)
+        matrix = numpy.asarray(newPacket)
+        return numpy.transpose(matrix)
+
+
     def codeHamming(self, pack):   #uzywajac macierzy G kodujemy nasz pakiecik
-        newPacket = self.createPacket(pack)
+        newPacket = self.createPacket4(pack)
         g = numpy.array([[1,1,0,1],[1,0,1,1],[1,0,0,0],[0,1,1,1],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) #(7,4)
         enc = numpy.dot(g, newPacket)%2
         #Powrot do listy char. ENC posiada 7 wierszy po kilka kolumn (len/7)
-        charPack = self.numpyToChar(enc)
+        charEnc = self.numpyToChar(enc)
         #nummi = self.charToNumpy(charPack) #wyglada tak samo jak enc
-        return charPack
+        return charEnc
 
     def parityCheck(self, enc): #uzywamy macierzy H aby stworzyc macierz na ktorej sprawdzimy czy sa bledy
-        enc = numpy.asarray(enc, dtype = int) # ValueError: setting an array element with a sequence.
-        h = numpy.array([[1,0,1,0,1,0,1],[0,1,1,0,0,1,1],[0,0,0,1,1,1,1]])
+        enc = self.createPacket7(enc) # ValueError: setting an array element with a sequence.
+        h = numpy.array([[1,0,1,0,1,0,1],[0,1,1,0,0,1,1],[0,0,0,1,1,1,1]]) #(3,7)
         parch = numpy.dot(h, enc)%2
-        return parch
+        charParch = self.numpyToChar(parch)
+        return charParch
 
     def isValid(self, enc):
-        parch = Hamming.parityCheck(self, enc)
+        parch = self.parityCheck(enc)
         counter = 0
-        if numpy.argmax(parch) == 1: # jezeli jest 1 czyli argument maksymalny to znaczy ze jest blad
-            counter += 1
+        for i in parch:
+            if i == '1': # jezeli jest 1 czyli argument maksymalny to znaczy ze jest blad
+                counter += 1
         if counter > 1:
             return False #sa minimum 2 bledy, hamming juz tego nie ogarnie
         else:
             return True #nie ma bledu lub jest tylko 1 wiec mozna naprawic
 
-    def decodeHamming(self, enc, parch): #uzywamy macierz R do odkodowania, robimy to dopiero jak poprawimy bledy "duh"
+    def decodeHamming(self, enc): #uzywamy macierz R do odkodowania, robimy to dopiero jak poprawimy bledy "duh"
+        parch = self.parityCheck(enc)
         number = 0
         for index, bit in enumerate(parch): # liczymy od 0
-            if bit == 1:
+            if bit == '1':
+                print(index)
                 number += 2^index # liczymy z binarki od razu na system dziesietny
-        if enc[number] == '0': # jezeli bylo 0 robimy 1
-            enc[number] == '1'
-        else:
-            enc[number] == '0'
+        for index, bit in enumerate(enc): # jezeli bylo 0 robimy 1
+            if index == number:
+                if bit == '1':
+                    bit == '0'
+                else:
+                    bit == '1'
         r = numpy.array([[0,0,1,0,0,0,0],[0,0,0,0,1,0,0],[0,0,0,0,0,0,1,0],[0,0,0,0,0,0,1]])
+        enc = self.createPacket4(enc)
         dec = numpy.dot(r, enc)
         return dec
 
@@ -103,3 +133,28 @@ class Hamming:
             if bit == '0':
                 intA.append(0)
         return numpy.array(intA)
+
+
+#mala zabawa i powtorka z algebry
+'''
+a = numpy.array([[1,2],[3,4]])
+b = numpy.array([[1,2],[3,4]])
+wynik1 = numpy.dot(a,b)
+b = numpy.transpose(b)
+wynik2 = numpy.dot(a,b)
+print(wynik1)
+print(wynik2)
+'''
+
+# podstawowe testy
+
+bitList = []
+fileOperator = FileOperator()
+bitList = fileOperator.readFile("test.txt")
+print(bitList)
+hamming = Hamming()
+bitList = hamming.codeHamming(bitList)
+print(bitList)
+print(hamming.parityCheck(bitList))
+bitList = hamming.decodeHamming(bitList)
+print(bitList)
