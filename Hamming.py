@@ -58,7 +58,7 @@ class Hamming:
         return charEnc
 
     def parityCheck(self, enc): #uzywamy macierzy H aby stworzyc macierz na ktorej sprawdzimy czy sa bledy
-        enc = self.createPacket7(enc) # ValueError: setting an array element with a sequence.
+        enc = self.createPacket7(enc)
         h = numpy.array([[1,0,1,0,1,0,1],[0,1,1,0,0,1,1],[0,0,0,1,1,1,1]]) #(3,7)
         parch = numpy.dot(h, enc)%2
         charParch = self.numpyToChar(parch)
@@ -80,21 +80,20 @@ class Hamming:
         number = 0
         for index, bit in enumerate(parch): # liczymy od 0
             if bit == '1':
-                print(index)
-                number += 2^index # liczymy z binarki od razu na system dziesietny
+                #print(index)
+                number += 2^index # liczymy z binarki od razu na system dziesietny TO JESZCZE DO ZMIANY
         print(number)
         print(enc)
         for index, bit in enumerate(enc): # jezeli bylo 0 robimy 1, a z 1 robimy 0
-            if index == number:
+            if index == number & number != 0:
                 if bit == '1':
                     enc[index] = '0'
                 else:
                     enc[index] = '1'
-        print(enc)
         r = numpy.array([[0,0,1,0,0,0,0],[0,0,0,0,1,0,0],[0,0,0,0,0,0,1,0],[0,0,0,0,0,0,1]]) # (4,7)
         enc = self.createPacket4(enc)
         dec = numpy.dot(r, enc)
-        charDec = self.numpyToChar(dec)
+        charDec = self.numpyToChar(dec) # jesli enc to same 0, to decode jest pusty
         return charDec
 
     def numpyToChar(self, enc):
@@ -128,8 +127,7 @@ class Hamming:
 
         return numpy.array(col)
 
-    def chToInt(self, chA): # nie dziala :c
-        # The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+    def chToInt(self, chA):
         intA = []
         for bit in chA:
             if bit == '1':
@@ -152,17 +150,23 @@ print(wynik2)
 
 # podstawowe testy
 
-bitList = []
+'''
+bitList = ['0','0','0','0','0','0','0','0','0','0','1']
+#bitList = []
 fileOperator = FileOperator()
-bitList = fileOperator.readFile("test.txt")
+#bitList = fileOperator.readFile("test.txt")
 print(bitList)
 hamming = Hamming()
 bitList = hamming.codeHamming(bitList)
+print("code hamming: ")
 print(bitList)
+print("code paritycheck: ")
 print(hamming.parityCheck(bitList))
 print("dlugosc bitlist przed")
 print(len(bitList))
 bitList = hamming.decodeHamming(bitList)
+print("decode hamming: ")
 print(bitList)
 print("dlugosc bitlist po")
 print(len(bitList))
+'''
