@@ -66,34 +66,52 @@ class Hamming:
 
     def isValid(self, enc):
         parch = self.parityCheck(enc)
-        counter = 0
-        for i in parch:
-            if i == '1': # jezeli jest 1 czyli argument maksymalny to znaczy ze jest blad
-                counter += 1
-        if counter > 1:
+        suma = 0
+        dlugosc = len(parch) - 1
+        for bit in parch: # liczymy od 0
+            if bit == '1':
+                if dlugosc != 0:
+                    number = 1*pow(2, dlugosc) # liczymy z binarki od razu na system dziesietny
+                    suma += number
+                    dlugosc -= 1
+                else:
+                    number = 1
+                    suma += number
+            else:
+                dlugosc -= 1
+        if suma > len(enc):
             return False #sa minimum 2 bledy, hamming juz tego nie ogarnie
         else:
             return True #nie ma bledu lub jest tylko 1 wiec mozna naprawic
 
-    def decodeHamming(self, enc): #uzywamy macierz R do odkodowania, robimy to dopiero jak poprawimy bledy "duh"
+    def decodeHamming(self, enc): #uzywamy macierz R do odkodowania
+        r = numpy.array([[0,0,1,0,0,0,0],[0,0,0,0,1,0,0],[0,0,0,0,0,1,0],[0,0,0,0,0,0,1]]) # (4,7)
         parch = self.parityCheck(enc)
         number = 0
-        for index, bit in enumerate(parch): # liczymy od 0
+        dlugosc = len(parch) - 1
+        suma = 0
+        for bit in parch: # liczymy od 0
             if bit == '1':
-                #print(index)
-                number += 2^index # liczymy z binarki od razu na system dziesietny TO JESZCZE DO ZMIANY
-        print(number)
-        print(enc)
+                if dlugosc != 0:
+                    number = 1*pow(2, dlugosc) # liczymy z binarki od razu na system dziesietny
+                    suma += number
+                    dlugosc -= 1
+                else:
+                    number = 1
+                    suma += number
+            else:
+                dlugosc -= 1
+        if suma > len(enc): # jezeli liczba policzona z binarki jest wieksza niz nasz zakodowany pakiet to oznacza wiecej niz 1 blad
+            return enc      #  zwraca to co przyszlo
         for index, bit in enumerate(enc): # jezeli bylo 0 robimy 1, a z 1 robimy 0
             if index == number & number != 0:
                 if bit == '1':
                     enc[index] = '0'
                 else:
                     enc[index] = '1'
-        r = numpy.array([[0,0,1,0,0,0,0],[0,0,0,0,1,0,0],[0,0,0,0,0,0,1,0],[0,0,0,0,0,0,1]]) # (4,7)
-        enc = self.createPacket4(enc)
+        enc = self.createPacket7(enc)
         dec = numpy.dot(r, enc)
-        charDec = self.numpyToChar(dec) # jesli enc to same 0, to decode jest pusty
+        charDec = self.numpyToChar(dec)
         return charDec
 
     def numpyToChar(self, enc):
@@ -151,15 +169,20 @@ print(wynik2)
 # podstawowe testy
 
 '''
-bitList = ['0','0','0','0','0','0','0','0','0','0','1']
-#bitList = []
+bitList = []
+#bitList = ['0','0','0','0','0','0','0','0','0','0','1']
+#bitList = ['1','0','1','1','0']
 fileOperator = FileOperator()
-#bitList = fileOperator.readFile("test.txt")
+bitList = fileOperator.readFile("test.txt")
 print(bitList)
+print("dlugosc bit list na samym pcozatku: ")
+print(len(bitList))
 hamming = Hamming()
 bitList = hamming.codeHamming(bitList)
 print("code hamming: ")
 print(bitList)
+print("dlugosc bit list po code: ")
+print(len(bitList))
 print("code paritycheck: ")
 print(hamming.parityCheck(bitList))
 print("dlugosc bitlist przed")
