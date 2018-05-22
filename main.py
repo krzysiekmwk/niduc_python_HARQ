@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from ParityBit import *
 from SelectiveRepeat import *
 from StopAndWait import *
@@ -194,7 +193,6 @@ print(len(bitListFinal))
 # Zapis listy bitow
 
 tk.mainloop()
-=======
 from ParityBit import *
 from SelectiveRepeat import *
 from StopAndWait import *
@@ -333,4 +331,3 @@ print(len(bitListFinal))
 # Zapis listy bitow
 
 tk.mainloop()
->>>>>>> cf860e7a80f785a28e156256bd4436a6a9381719
