@@ -21,6 +21,7 @@ class SelectiveRepeat:
         self.window = win
         self.errorCounter = 0
         self.isBSC = isBSC
+        self.countOfRelay = 0
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages
@@ -90,9 +91,12 @@ class SelectiveRepeat:
                     self.errorCounter += 1
 
             while (len(errors) > 0):  # dodanie paczek do glownego bufora z blednymi paczkami, zostana wyslane w nastepnym kroku petli
+                self.countOfRelay += 1
                 index = errors.pop()
                 if (self.isBSC):
                     errorBuf.append(self.channelModel.addBSCNoise(self.sourcePackages[sended]))
                 else:
                     errorBuf.append(self.channelModel.addGilbertNoise(self.sourcePackages[sended])) # ZAKLOCANIE
                 errorIndexes.append(index)
+
+        print("Ilosc retranmisji: " + str(self.countOfRelay))
