@@ -1,16 +1,24 @@
 from ParityBit import *
-from SelectiveRepeat import *
 from StopAndWait import *
+from SelectiveRepeat import *
 from Hamming import *
+from CRC import *
+
+# Stale do zmieniania do testow
+wielkoscPakietu = 8
+wielkoscOknaSR = 5
+
+prawdopodobienstwoBSC = 0.00000000000003
+channelS0 = 0.1
+channelS1 = 0.1
+channelP01 = 0.3
+channelP10 = 0.6
 
 # Wczytanie listy bitow
-from StopAndWaitGUI import StopAndWaitGUI
-
 bitList = []
 fileOperator = FileOperator()
 bitList = fileOperator.readFile("test.txt")
 print(bitList)
-parity = ParityBit()
 
 packets = []
 packet = []
@@ -21,30 +29,35 @@ for bit in bitList:
     packet.append(bit)  # generuje pakiet
 
     counter += 1
-    if (counter == 8):  # pakiet po 8 bitow
+    if (counter == wielkoscPakietu):  # pakiet po 8 bitow
         packets.append(packet)  # tworzy liste pakietow
         packet = []
         counter = 0
 
+if(len(packet) > 0):    # mozliwe tworzenie pakietow wiekszych niz 8 bitow. po prostu ostatni pakiet, bedzie malutki
+    packets.append(packet)
+
 # DODANIE BITU PARZYSTOSCI DO KAZDEGO Z PAKIETOW
 tmr = TMR()
 hamming = Hamming()
+crc = CRC()
+parity = ParityBit()
+channel = Channel(prawdopodobienstwoBSC, channelS0, channelS1, channelP01, channelP10)
+
 print(packets)
 packetsWithParityBit = []
 for pack in packets:
-    #pack = parity.addParityBit(pack)
-    #pack = tmr.codeTMR(pack)    # DODANIE TMR
-    pack = hamming.codeHamming(pack)   # odpalenie Hamminga,
-    pack = parity.addParityBit(pack)
+    pack = tmr.codeTMR(pack)            # DODANIE TMR
+    pack = parity.addParityBit(pack)    # DODANIE PARITY BIT
+    # pack = hamming.codeHamming(pack)   # DODANIE Hamminga
+    # pack = crc.addCRC(pack)            # DODANIE CRC
 
     packetsWithParityBit.append(pack)
 
 print(packetsWithParityBit)
 
-channel = Channel(0.00000000000003,0.1,0.1,0.3,0.6)
-
 print("Wysylanie")
-# sr = SelectiveRepeat(packetsWithParityBit, channel, parity, 5)
+# sr = SelectiveRepeat(packetsWithParityBit, channel, parity, wielkoscOknaSR)
 sr = StopAndWait(packetsWithParityBit,channel,parity)
 sr.transmit()
 packList = sr.getDestinationPackets()
@@ -54,11 +67,12 @@ print(packList)
 # USUWANIE BITOW PARZYSTOSCI Z KAZDEGO PAKIETU
 packets = []
 for pack in packList:
-    #pack = tmr.decodeTMR(pack)  # USUWANIE TMR
-    pack = parity.deleteParityBit(pack)
-    pack = hamming.decodeHamming(pack) # usuniecie Hamminga
-    #pack = parity.deleteParityBit(pack)
-    packets.append(pack)
+    pack = parity.deleteParityBit(pack)     # USUWANIE PARITY BIT
+    pack = tmr.decodeTMR(pack)              # USUWANIE TMR
+
+    # pack = hamming.decodeHamming(pack) # usuniecie Hamminga
+    # pack = crc.deleteCRC(pack)
+    packets.append(pack)                    # USUWANIE CRC
 
 print(packets)
 
@@ -69,10 +83,6 @@ for package in packets:
         bitListFinal.append(bit)
 
 print(bitListFinal)
-
-print("save data")
-fileOperator.saveFile("wynik.txt", bitListFinal)
-print("end")
 
 #METODA ZLICZAJACA BLEDY
 counterError = 0
@@ -86,3 +96,11 @@ print("ilosc blednych bitow wynikowych")
 print(counterError)
 print("ilosc pakietow ogolem")
 print(len(bitListFinal))
+print("BER")
+print(counterError / len(bitListFinal) * 100)
+
+
+# ZAPIS PLIKU WYNIKOWEGO - MOZNA SIE PRZEKONAC JAK WPLYNELY BLEDY NA PLIK
+print("save data")
+fileOperator.saveFile("wynik.txt", bitListFinal)
+print("end")
