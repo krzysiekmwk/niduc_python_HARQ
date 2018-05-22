@@ -5,6 +5,8 @@ from Hamming import *
 from CRC import *
 
 # Stale do zmieniania do testow
+iloscPetli = 3
+
 wielkoscPakietu = 8
 wielkoscOknaSR = 5
 
@@ -22,92 +24,107 @@ bitList = []
 fileOperator = FileOperator()
 # bitList = fileOperator.readFile("test.txt")
 bitList = fileOperator.readFile("test.jpg")
-print(bitList)
+# print(bitList)
 
-packets = []
-packet = []
+sumaTestowBER = 0
+iloscBER = iloscPetli
 
-# GENEROWANIE LISTY PAKIETOW DO WYSLANIA
-counter = 0
-for bit in bitList:
-    packet.append(bit)  # generuje pakiet
+print("START TESTOW")
 
-    counter += 1
-    if (counter == wielkoscPakietu):  # pakiet po 8 bitow
-        packets.append(packet)  # tworzy liste pakietow
-        packet = []
-        counter = 0
+while(iloscPetli > 0):
+    packets = []
+    packet = []
 
-if(len(packet) > 0):    # mozliwe tworzenie pakietow wiekszych niz 8 bitow. po prostu ostatni pakiet, bedzie malutki
-    packets.append(packet)
+    # GENEROWANIE LISTY PAKIETOW DO WYSLANIA
+    counter = 0
+    for bit in bitList:
+        packet.append(bit)  # generuje pakiet
 
-# DODANIE BITU PARZYSTOSCI DO KAZDEGO Z PAKIETOW
-tmr = TMR()
-hamming = Hamming()
-crc = CRC()
-parity = ParityBit()
-channel = Channel(prawdopodobienstwoBSC, channelS0, channelS1, channelP01, channelP10)
+        counter += 1
+        if (counter == wielkoscPakietu):  # pakiet po 8 bitow
+            packets.append(packet)  # tworzy liste pakietow
+            packet = []
+            counter = 0
 
-print(packets)
-packetsWithParityBit = []
-for pack in packets:
-    pack = tmr.codeTMR(pack)            # DODANIE TMR
-    pack = parity.addParityBit(pack)    # DODANIE PARITY BIT
-    # pack = hamming.codeHamming(pack)   # DODANIE Hamminga
-    # pack = crc.addCRC(pack)            # DODANIE CRC
+    if(len(packet) > 0):    # mozliwe tworzenie pakietow wiekszych niz 8 bitow. po prostu ostatni pakiet, bedzie malutki
+        packets.append(packet)
 
-    packetsWithParityBit.append(pack)
+    # DODANIE BITU PARZYSTOSCI DO KAZDEGO Z PAKIETOW
+    tmr = TMR()
+    hamming = Hamming()
+    crc = CRC()
+    parity = ParityBit()
+    channel = Channel(prawdopodobienstwoBSC, channelS0, channelS1, channelP01, channelP10)
 
-print(packetsWithParityBit)
+    # print(packets)
+    packetsWithParityBit = []
+    for pack in packets:
+        pack = tmr.codeTMR(pack)            # DODANIE TMR
+        pack = parity.addParityBit(pack)    # DODANIE PARITY BIT
+        # pack = hamming.codeHamming(pack)   # DODANIE Hamminga
+        # pack = crc.addCRC(pack)            # DODANIE CRC
 
-print("Wysylanie")
-if(isSAW):
-    sr = StopAndWait(packetsWithParityBit, channel, parity, isBSC)
-    sr.transmit()
-    packList = sr.getDestinationPackets()
-else:
-    sr = SelectiveRepeat(packetsWithParityBit, channel, parity, wielkoscOknaSR, isBSC)
-    sr.transmit()
-    packList = sr.getDestinationPackets()
+        packetsWithParityBit.append(pack)
 
-print("Odbieranie")
+    # print(packetsWithParityBit)
 
-print(packList)
-# USUWANIE BITOW PARZYSTOSCI Z KAZDEGO PAKIETU
-packets = []
-for pack in packList:
-    pack = parity.deleteParityBit(pack)     # USUWANIE PARITY BIT
-    pack = tmr.decodeTMR(pack)              # USUWANIE TMR
+    # print("Wysylanie")
+    if(isSAW):
+        sr = StopAndWait(packetsWithParityBit, channel, parity, isBSC)
+        sr.transmit()
+        packList = sr.getDestinationPackets()
+    else:
+        sr = SelectiveRepeat(packetsWithParityBit, channel, parity, wielkoscOknaSR, isBSC)
+        sr.transmit()
+        packList = sr.getDestinationPackets()
 
-    # pack = hamming.decodeHamming(pack) # usuniecie Hamminga
-    # pack = crc.deleteCRC(pack)
-    packets.append(pack)                    # USUWANIE CRC
+    # print("Odbieranie")
 
-print(packets)
+    # print(packList)
+    # USUWANIE BITOW PARZYSTOSCI Z KAZDEGO PAKIETU
+    packets = []
+    for pack in packList:
+        pack = parity.deleteParityBit(pack)     # USUWANIE PARITY BIT
+        pack = tmr.decodeTMR(pack)              # USUWANIE TMR
 
-# TWORZENIE PLIKU WYNIKOWEGO
-bitListFinal = []
-for package in packets:
-    for bit in package:
-        bitListFinal.append(bit)
+        # pack = hamming.decodeHamming(pack) # usuniecie Hamminga
+        # pack = crc.deleteCRC(pack)
+        packets.append(pack)                    # USUWANIE CRC
 
-print(bitListFinal)
+    # print(packets)
 
-#METODA ZLICZAJACA BLEDY
-counterError = 0
-ind = 0
-for bit in bitListFinal:
-    if (bit != bitList[ind]):
-        counterError += 1
-    ind += 1
+    # TWORZENIE PLIKU WYNIKOWEGO
+    bitListFinal = []
+    for package in packets:
+        for bit in package:
+            bitListFinal.append(bit)
 
-print("ilosc blednych bitow wynikowych")
-print(counterError)
-print("ilosc pakietow ogolem")
-print(len(bitListFinal))
-print("BER")
-print(counterError / len(bitListFinal) * 100)
+    # print(bitListFinal)
 
+    #METODA ZLICZAJACA BLEDY
+    counterError = 0
+    ind = 0
+    for bit in bitListFinal:
+        if (bit != bitList[ind]):
+            counterError += 1
+        ind += 1
+
+    print("ilosc blednych bitow wynikowych")
+    print(counterError)
+    print("ilosc pakietow ogolem")
+    print(len(bitListFinal))
+    print("BER")
+    print(counterError / len(bitListFinal) * 100)
+
+    BER = counterError / len(bitListFinal) * 100
+    sumaTestowBER = sumaTestowBER + BER
+
+    iloscPetli = iloscPetli - 1
+
+print("KONIEC TESTOW")
+
+print("Srednia BER: ")
+print(sumaTestowBER / iloscBER)
 
 # ZAPIS PLIKU WYNIKOWEGO - MOZNA SIE PRZEKONAC JAK WPLYNELY BLEDY NA PLIK
 print("save data")

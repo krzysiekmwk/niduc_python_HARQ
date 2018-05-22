@@ -26,7 +26,7 @@ class StopAndWait:
         return self.errorCounter
 
     def transmit(self):   #TRANSMITUJE PAKIETY Z sourcePackages do destPackages
-        print("Rozpoczynam transmisje danych")
+        # print("Rozpoczynam transmisje danych")
         packetsize = len(self.sourcePackages[0])
 
         tempDest = []
@@ -42,7 +42,7 @@ class StopAndWait:
         packets = len(self.sourcePackages) #ilosc pakietow
 
         while(sended < packets):  # ! U W A G A JEZELI JEST ZBYT DUZO BLEDOW TO PLIK NIE PRZEJDZIE BO SENDED DOJDZIE DO KONCA A ERRORBUF NIE BEDZIE PUSTY
-            print("petla nr {}".format(sended))
+            # print("petla nr {}".format(sended))
             if(self.isBSC):
                 packet = self.channelModel.addBSCNoise(self.sourcePackages[sended])
             else:
@@ -52,7 +52,7 @@ class StopAndWait:
             while (self.protocol.isValid(packet) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
                 #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                 self.errorCounter += 1
-                print("\twysylanie pakietu {}".format(sended))
+                # print("\twysylanie pakietu {}".format(sended))
                 packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
 
             self.destPackages[sended] = packet  # paczka zapisana

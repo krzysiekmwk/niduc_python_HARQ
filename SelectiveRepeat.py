@@ -29,7 +29,7 @@ class SelectiveRepeat:
         return self.errorCounter
 
     def transmit(self):   #TRANSMITUJE PAKIETY Z sourcePackages do destPackages
-        print("Rozpoczynam transmisje danych")
+        # print("Rozpoczynam transmisje danych")
 
         buffer = [] # wyslane paczki
         indexes = [] #indeksy paczek
@@ -51,7 +51,7 @@ class SelectiveRepeat:
         packets = len(self.sourcePackages) #ilosc pakietow
 
         while(sended < packets or len(errorBuf) > 0):  # ! U W A G A JEZELI JEST ZBYT DUZO BLEDOW TO PLIK NIE PRZEJDZIE BO SENDED DOJDZIE DO KONCA A ERRORBUF NIE BEDZIE PUSTY
-            print("petla nr {}".format(sended))
+            # print("petla nr {}".format(sended))
             while (len(buffer) < self.window - len(errorBuf) and sended < packets):  #dodajemy do bufora pakiety,
                 if (self.isBSC):
                     buffer.append(self.channelModel.addBSCNoise(self.sourcePackages[sended]))
@@ -72,20 +72,20 @@ class SelectiveRepeat:
                     #print("\tpaczka prawidlowa")
                     self.destPackages[index] = packet  # paczka zapisana
                 else:
-                    print("\tpaczka NIEprawidlowa")
+                    # print("\tpaczka NIEprawidlowa")
                     errors.append(index)  #  dodanie INDEKSU paczki jako bledna
                     self.errorCounter += 1
 
             while (len(errorBuf) > 0):  # jezeli w glownym buforze z blednymi paczkami sa jakies paczki to nastepuja proba ich wyslania
                 packet = errorBuf.pop()
                 index = errorIndexes.pop()
-                print("Proba wyslania BLEDNYCH pakietow")
+                # print("Proba wyslania BLEDNYCH pakietow")
                 #TMR
                 if (self.protocol.isValid(packet)): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
-                    print("\tpaczka prawidlowa")
+                    # print("\tpaczka prawidlowa")
                     self.destPackages[index] = packet  # zapisanie paczki
                 else:
-                    print("\tpaczka NIEprawidlowa")
+                    # print("\tpaczka NIEprawidlowa")
                     errors.append(index)  # dodanie paczki jako bledna
                     self.errorCounter += 1
 
