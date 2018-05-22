@@ -12,12 +12,12 @@ class StopAndWait:
     channelModel = None #model channelu
     errorCounter = 0 #ogolna ilosc NAKów
 
-    def __init__(self,src,chan,prot):
+    def __init__(self, src, chan, prot, isBSC):
         self.sourcePackages = src
         self.channelModel = chan
         self.protocol = prot
+        self.isBSC = isBSC
         self.errorCounter = 0
-        self.tmr = TMR()
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages
@@ -43,22 +43,17 @@ class StopAndWait:
 
         while(sended < packets):  # ! U W A G A JEZELI JEST ZBYT DUZO BLEDOW TO PLIK NIE PRZEJDZIE BO SENDED DOJDZIE DO KONCA A ERRORBUF NIE BEDZIE PUSTY
             print("petla nr {}".format(sended))
-            packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended]) # ZAKLOCANIE
+            if(self.isBSC):
+                packet = self.channelModel.addBSCNoise(self.sourcePackages[sended])
+            else:
+                packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended]) # ZAKLOCANIE
 
             #ODBIERANIE PAKIETOW
-            #TMR
-            while (self.protocol.isValid(self.tmr.decodeTMR(packet)) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
+            while (self.protocol.isValid(packet) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
                 #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                 self.errorCounter += 1
                 print("\twysylanie pakietu {}".format(sended))
                 packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
-            #HAMMING
-            '''
-            while (self.protocol.isValid(self.tmr.decodeTMR(packet)) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
-                #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
-                self.errorCounter += 1
-                print("\twysylanie pakietu {}".format(sended))
-                packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
-                '''
+
             self.destPackages[sended] = packet  # paczka zapisana
             sended += 1

@@ -8,16 +8,20 @@ from CRC import *
 wielkoscPakietu = 8
 wielkoscOknaSR = 5
 
-prawdopodobienstwoBSC = 0.00000000000003
+prawdopodobienstwoBSC = 0.0003
 channelS0 = 0.1
 channelS1 = 0.1
 channelP01 = 0.3
 channelP10 = 0.6
 
+isBSC = True    # True - BSC / False - Gilbert
+isSAW = True    # True - SAW / FALSE - SR
+
 # Wczytanie listy bitow
 bitList = []
 fileOperator = FileOperator()
-bitList = fileOperator.readFile("test.txt")
+# bitList = fileOperator.readFile("test.txt")
+bitList = fileOperator.readFile("test.jpg")
 print(bitList)
 
 packets = []
@@ -57,10 +61,15 @@ for pack in packets:
 print(packetsWithParityBit)
 
 print("Wysylanie")
-# sr = SelectiveRepeat(packetsWithParityBit, channel, parity, wielkoscOknaSR)
-sr = StopAndWait(packetsWithParityBit,channel,parity)
-sr.transmit()
-packList = sr.getDestinationPackets()
+if(isSAW):
+    sr = StopAndWait(packetsWithParityBit, channel, parity, isBSC)
+    sr.transmit()
+    packList = sr.getDestinationPackets()
+else:
+    sr = SelectiveRepeat(packetsWithParityBit, channel, parity, wielkoscOknaSR, isBSC)
+    sr.transmit()
+    packList = sr.getDestinationPackets()
+
 print("Odbieranie")
 
 print(packList)
@@ -102,5 +111,6 @@ print(counterError / len(bitListFinal) * 100)
 
 # ZAPIS PLIKU WYNIKOWEGO - MOZNA SIE PRZEKONAC JAK WPLYNELY BLEDY NA PLIK
 print("save data")
-fileOperator.saveFile("wynik.txt", bitListFinal)
+# fileOperator.saveFile("wynik.txt", bitListFinal)
+fileOperator.saveFile("wynik.jpg", bitListFinal)
 print("end")
