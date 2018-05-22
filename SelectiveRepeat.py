@@ -94,9 +94,9 @@ class SelectiveRepeat:
                 self.countOfRelay += 1
                 index = errors.pop()
                 if (self.isBSC):
-                    errorBuf.append(self.channelModel.addBSCNoise(self.sourcePackages[sended]))
+                    errorBuf.append(self.channelModel.addBSCNoise(self.sourcePackages[index]))
                 else:
-                    errorBuf.append(self.channelModel.addGilbertNoise(self.sourcePackages[sended])) # ZAKLOCANIE
+                    errorBuf.append(self.channelModel.addGilbertNoise(self.sourcePackages[index])) # ZAKLOCANIE
                 errorIndexes.append(index)
 
         print("Ilosc retranmisji: " + str(self.countOfRelay))
