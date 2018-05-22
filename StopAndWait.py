@@ -18,6 +18,7 @@ class StopAndWait:
         self.protocol = prot
         self.isBSC = isBSC
         self.errorCounter = 0
+        self.countOfRelay = 0
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages
@@ -53,7 +54,14 @@ class StopAndWait:
                 #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                 self.errorCounter += 1
                 # print("\twysylanie pakietu {}".format(sended))
-                packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
+                if (self.isBSC):
+                    packet = self.channelModel.addBSCNoise(self.sourcePackages[sended])
+                else:
+                    packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
+
+                self.countOfRelay += 1
 
             self.destPackages[sended] = packet  # paczka zapisana
             sended += 1
+
+        print("Ilosc retranmisji: " + str(self.countOfRelay))
