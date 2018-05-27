@@ -50,17 +50,16 @@ class Hamming:
         matrix = numpy.asarray(newPacket)
         return matrix
 
-    def codeHamming(self, pack):   #uzywajac macierzy G kodujemy nasz pakiecik
+    def codeHamming(self, pack):   # uzywajac macierzy G kodujemy nasz pakiecik
         newPacket = self.createPacket4(pack)
         g = numpy.array([
             [1, 1, 1, 0, 0, 0, 0],
             [1, 0, 0, 1, 1, 0, 0],
             [0, 1, 0, 1, 0, 1, 0],
             [1, 1, 0, 1, 0, 0, 1]
-        ]) #(4,7)
+        ])  # (4,7)
         enc = numpy.dot(newPacket, g)%2
-        charEnc = self.numpyToChar(enc)
-        return charEnc
+        return self.numpyToChar(enc)
 
     def parityCheck(self, enc): #uzywamy macierzy H aby stworzyc macierz na ktorej sprawdzimy czy sa bledy
         enc = self.charToNumpy(enc)
@@ -76,40 +75,6 @@ class Hamming:
 
     def isValid(self, enc):
         parch = self.parityCheck(enc)
-        suma = 0
-        dlugosc = len(parch) - 1
-        for bit in parch: # liczymy od 0
-            if bit == '1':
-                if dlugosc != 0:
-                    number = 1*pow(2, dlugosc) # liczymy z binarki od razu na system dziesietny
-                    suma += number
-                    dlugosc -= 1
-                else:
-                    number = 1
-                    suma += number
-            else:
-                dlugosc -= 1
-        if suma > len(enc):
-            return False #sa minimum 2 bledy, hamming juz tego nie ogarnie
-        else:
-            return True #nie ma bledu lub jest tylko 1 wiec mozna naprawic
-
-    def decodeHamming(self, enc): #uzywamy macierz R do odkodowania
-        print("enc przed zmiana: ")
-        print(enc)
-        print("enc po zmianie:")
-        enc[0] = '1'
-        #enc[3]='1'
-        print(enc)
-        r = numpy.array([
-            [0, 0, 1, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 0, 0, 1]
-        ])
-        parch = self.parityCheck(enc)
-        print("parch po zmianach: ")
-        print(parch)
         dlugosc = 0
         suma = 0
         for bit in parch: # liczymy od 0
@@ -119,7 +84,37 @@ class Hamming:
                 suma += number
             else:
                 dlugosc += 1
-        print(suma)
+        if suma > len(enc):
+            return False #sa minimum 2 bledy, hamming juz tego nie ogarnie
+        else:
+            return True #nie ma bledu lub jest tylko 1 wiec mozna naprawic
+
+    def decodeHamming(self, enc): # uzywamy macierz R do odkodowania
+        # print("enc przed zmiana: ")
+        # print(enc)
+        # print("enc po zmianie:")
+        # enc[0] = '1'
+        # enc[3]='1'
+        # print(enc)
+        r = numpy.array([
+            [0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 1]
+        ])
+        parch = self.parityCheck(enc)
+        # print("parch po zmianach: ")
+        # print(parch)
+        dlugosc = 0
+        suma = 0
+        for bit in parch: # liczymy od 0
+            if bit == '1':
+                number = 1*pow(2, dlugosc) # liczymy z binarki od razu na system dziesietny
+                dlugosc += 1
+                suma += number
+            else:
+                dlugosc += 1
+        # print(suma)
         if suma < len(enc):
             for index, bit in enumerate(enc): # jezeli bylo 0 robimy 1, a z 1 robimy 0
                 if index == suma & suma != 0:
@@ -127,8 +122,8 @@ class Hamming:
                         enc[index-1] = '0'
                     else:
                         enc[index-1] = '1'
-        print("enc po poprawie: ")
-        print(enc)
+        # print("enc po poprawie: ")
+        # print(enc)
         enc = self.charToNumpy(enc)
         dec = numpy.dot(r, enc.T)
         charDec = self.numpyToChar(dec)
@@ -199,30 +194,30 @@ print(wynik2)
 # podstawowe testy
 
 
-bitList = []
-#bitList = ['0','0','0','0','0','0','0','0','0','0','0','1']
-#bitList = ['1','0','1','1','0']  # PRZY MALYCH SIE W CHUJ PIERDOLI
-bitList = ['1','0','1','1']
-fileOperator = FileOperator()
-#bitList = fileOperator.readFile("test.txt")
-print(bitList)
-print("dlugosc bit list na samym pcozatku: ")
-print(len(bitList))
-hamming = Hamming()
-bitList = hamming.codeHamming(bitList)
-print("code hamming: ")
-print(bitList)
-print("dlugosc bit list po code: ")
-print(len(bitList))
-print("code paritycheck: ")
-print(hamming.parityCheck(bitList))
-print("dlugosc bitlist przed")
-print(len(bitList))
-bitList = hamming.decodeHamming(bitList)
-print("decode hamming: ")
-print(bitList)
-print("dlugosc bitlist po")
-print(len(bitList))
+# bitList = []
+# #bitList = ['0','0','0','0','0','0','0','0','0','0','0','1']
+# #bitList = ['1','0','1','1','0']  # PRZY MALYCH SIE W CHUJ PIERDOLI
+# bitList = ['1','0','1','1']
+# fileOperator = FileOperator()
+# #bitList = fileOperator.readFile("test.txt")
+# print(bitList)
+# print("dlugosc bit list na samym pcozatku: ")
+# print(len(bitList))
+# hamming = Hamming()
+# bitList = hamming.codeHamming(bitList)
+# print("code hamming: ")
+# print(bitList)
+# print("dlugosc bit list po code: ")
+# print(len(bitList))
+# print("code paritycheck: ")
+# print(hamming.parityCheck(bitList))
+# print("dlugosc bitlist przed")
+# print(len(bitList))
+# bitList = hamming.decodeHamming(bitList)
+# print("decode hamming: ")
+# print(bitList)
+# print("dlugosc bitlist po")
+# print(len(bitList))
 
 # testy kodu od Sembereckiego
 '''
