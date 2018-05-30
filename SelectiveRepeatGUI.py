@@ -15,18 +15,17 @@ class SelectiveRepeatGUI:
     window = 0 #ilosc pakietow w oknie tzn. ile na raz pakietow zostanie wyslanych
     errorCounter = 0 #ogolna ilosc NAKów
 
-    def __new__(cls,src,chan,prot,win, tk):
+    def __init__(self, src, chan, prot, win, isBSC, tk):
         self.sourcePackages = src
         self.channelModel = chan
         self.protocol = prot
         self.window = win
         self.errorCounter = 0
-        self.tmr = TMR()
-        self.hamming = Hamming()
+        self.isBSC = isBSC
+        self.countOfRelay = 0
         self.tk = tk
         self.waitForNextStep = True
         self.isWindowDestroyed = False
-        return super(SelectiveRepeatGUI,cls).__new__(cls)
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages
@@ -98,7 +97,10 @@ class SelectiveRepeatGUI:
             while (len(buffer) < self.window - len(errorBuf) and sended < packets):
 
                 # ZAKLOCANIE
-                buffer.append(self.channelModel.addGilbertNoise(self.sourcePackages[sended]))
+                if (self.isBSC):
+                    buffer.append(self.channelModel.addBSCNoise(self.sourcePackages[sended]))
+                else:
+                    buffer.append(self.channelModel.addGilbertNoise(self.sourcePackages[sended]))
 
                 # Show nr of package
                 packetLabelText.set("Nr package to send: " + str(sended))
@@ -119,8 +121,7 @@ class SelectiveRepeatGUI:
             while (len(buffer) > 0):
                 packet = buffer.pop()
                 index = indexes.pop()
-                #TMR
-                if (self.protocol.isValid(self.tmr.decodeTMR(packet))): #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
+                if (self.protocol.isValid(packet)): #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                     #print("\tpaczka prawidlowa")
 
                     # get ACK
@@ -160,8 +161,7 @@ class SelectiveRepeatGUI:
                     self.waitForNextStep = True
                 canvas.update()
 
-                #TMR
-                if (self.protocol.isValid(self.tmr.decodeTMR(packet))): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
+                if (self.protocol.isValid(packet)): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
                     print("\tpaczka prawidlowa")
 
                     # get ACK
@@ -188,7 +188,12 @@ class SelectiveRepeatGUI:
                     errors.append(index)  # dodanie paczki jako bledna
                     self.errorCounter += 1
             while (len(errors) > 0):  # dodanie paczek do glownego bufora z blednymi paczkami, zostana wyslane w nastepnym kroku petli
+                self.countOfRelay += 1
                 index = errors.pop()
-                errorBuf.append(self.channelModel.addGilbertNoise(self.sourcePackages[index])) #dodanie do glownego bufora z blednymi paczkami, pobranymi jeszcze raz z source i zakloconymi
-                #errorBuf.append(self.channelModel.addBSCNoise(self.sourcePackages[sended]))
+                if (self.isBSC):
+                    errorBuf.append(self.channelModel.addBSCNoise(self.sourcePackages[index]))
+                else:
+                    errorBuf.append(self.channelModel.addGilbertNoise(self.sourcePackages[index]))
                 errorIndexes.append(index)
+
+        print("Ilosc retranmisji: " + str(self.countOfRelay))

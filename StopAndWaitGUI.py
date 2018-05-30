@@ -13,16 +13,16 @@ class StopAndWaitGUI:
     channelModel = None #model channelu
     errorCounter = 0 #ogolna ilosc NAKów
 
-    def __new__(cls,src,chan,prot,tk):
+    def __init__(self, src, chan, prot, isBSC, tk):
         self.sourcePackages = src
         self.channelModel = chan
         self.protocol = prot
+        self.isBSC = isBSC
         self.errorCounter = 0
-        self.tmr = TMR()
+        self.countOfRelay = 0
         self.tk = tk
         self.waitForNextStep = True
         self.isWindowDestroyed = False
-        return super(StopAndWaitGUI, cls).__new__(cls)
 
     def getDestinationPackets(self): #zwraca "przerobiony" plik
         return self.destPackages
@@ -32,14 +32,6 @@ class StopAndWaitGUI:
 
     def _nextStep(self):
         self.waitForNextStep = False
-
-    '''
-    def _faster(self):
-            if(self.isWindowDestroyed == True):
-                self.isWindowDestroyed = False
-            else:
-                self.isWindowDestroyed = True
-    '''
 
     def _delete_window(self):
         self.window.destroy()
@@ -102,11 +94,14 @@ class StopAndWaitGUI:
             canvas.update()
 
             # ZAKLOCANIE
-            packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
+            if (self.isBSC):
+                packet = self.channelModel.addBSCNoise(self.sourcePackages[sended])
+            else:
+                packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
 
             #ODBIERANIE PAKIETOW
             #TMR
-            while (self.protocol.isValid(self.tmr.decodeTMR(packet)) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
+            while (self.protocol.isValid(packet) == False): # Sprawdzenie odkodowanego tymczasowo pakietu z TMR
                 #TUTAJ BEDZIEMY SPRAWDZAC ACK == TRUE, NAK == FALSE
                 self.errorCounter += 1
 
@@ -131,7 +126,12 @@ class StopAndWaitGUI:
                 canvas.update()
 
                 # Ponowne zaklocenie poprawnego pakietu. "Retransmisja uszkodzonego pakietu"
-                packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
+                if (self.isBSC):
+                    packet = self.channelModel.addBSCNoise(self.sourcePackages[sended])
+                else:
+                    packet = self.channelModel.addGilbertNoise(self.sourcePackages[sended])
+
+                self.countOfRelay += 1
 
             packetLabelText.set("ACK: " + str(sended))
 
@@ -145,3 +145,5 @@ class StopAndWaitGUI:
 
             self.destPackages[sended] = packet  # paczka zapisana poprawnie odebranych danych (moga byc uszkodzenia)
             sended += 1
+
+        print("Ilosc retranmisji: " + str(self.countOfRelay))
