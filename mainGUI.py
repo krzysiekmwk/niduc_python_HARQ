@@ -156,8 +156,8 @@ for pack in packList:
         pack = parity.deleteParityBit(pack)
         pack = tmr.decodeTMR(pack)
     if varPACK.get() == 2:
-        pack = hamming.decodeHamming(pack)  # usuniecie Hamminga
         pack = crc.deleteParityBit(pack)
+        pack = hamming.decodeHamming(pack)  # usuniecie Hamminga
 
     packets.append(pack)
 
